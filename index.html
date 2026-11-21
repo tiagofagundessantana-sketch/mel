@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CARBOMEL | Mel Puro — Sistema de Gestão v1.0</title>
+  <style>
+    :root {
+      --bg: #f3f4f6;
+      --surface: #ffffff;
+      --sidebar: #141619;
+      --sidebar-hover: #22262c;
+      --gold: #f5b700;
+      --gold-dark: #d99b00;
+      --gold-soft: #fef3c7;
+      --text: #111827;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --green-bg: #dcfce7;
+      --green-txt: #166534;
+      --yellow-bg: #fef9c3;
+      --yellow-txt: #854d0e;
+      --red-bg: #fee2e2;
+      --red-txt: #991b1b;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: "Segoe UI", system-ui, -apple-system, sans-serif; }
+    body { background: var(--bg); color: var(--text); }
+
+    .layout { display: flex; min-height: 100vh; }
+
+    /* Sidebar */
+    .sidebar {
+      width: 230px;
+      background: var(--sidebar);
+      color: #e5e7eb;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 16px 12px;
+      flex-shrink: 0;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px;
+      margin-bottom: 14px;
+      border-bottom: 1px solid #23272e;
+      padding-bottom: 14px;
+    }
+    .brand-logo {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #fde047, #f5b700 70%, #b45309);
+      display: grid;
+      place-items: center;
+      font-size: 22px;
+      box-shadow: 0 0 0 2px #141619, 0 0 0 4px var(--gold);
+    }
+    .brand-title { font-weight: 900; color: var(--gold); font-size: 16px; letter-spacing: 0.5px; }
+    .brand-sub { font-size: 11px; color: #fde68a; font-weight: 700; letter-spacing: 0.8px; }
+
+    .menu { display: flex; flex-direction: column; gap: 3px; }
+    .menu-btn {
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: #d1d5db;
+      text-align: left;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: 0.15s;
+    }
+    .menu-btn:hover { background: var(--sidebar-hover); color: #fff; }
+    .menu-btn.active { background: var(--gold); color: #141619; font-weight: 700; }
+
+    .sidebar-footer {
+      border-top: 1px solid #262a30;
+      padding-top: 12px;
+      margin-top: 12px;
+    }
+    .slogan { color: var(--gold); font-weight: 800; font-size: 14px; font-style: italic; margin-bottom: 6px; }
+    .sidebar-footer small { color: #9ca3af; font-size: 11px; line-height: 1.45; display: block; }
+
+    /* Main */
+    .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 10px; font-size: 16px; }
+    .hamburger { background: none; border: none; font-size: 20px; cursor: pointer; padding: 4px 8px; border-radius: 6px; }
+    .hamburger:hover { background: #f3f4f6; }
+    .divider { color: #cbd5e1; font-weight: 300; }
+    .topbar-right { display: flex; align-items: center; gap: 14px; font-size: 13px; }
+    .date-box { text-align: right; line-height: 1.25; }
+    .date-box small { color: var(--muted); }
+    .notif-btn {
+      background: #f9fafb;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 6px 10px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .notif-badge {
+      background: #ef4444;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 999px;
+      margin-left: 3px;
+    }
+    .admin-box {
+      background: #f3f4f6;
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    .content { padding: 22px 24px; }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+    .page-header h1 { font-size: 26px; display: flex; align-items: center; gap: 10px; }
+    .page-header p { color: var(--muted); font-size: 14px; margin-top: 3px; }
+    .header-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .view-section { display: none; }
+    .view-section.active { display: block; }
+
+    /* KPIs */
+    .kpis {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+    .kpi-card {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 16px 18px;
+      border-left: 4px solid var(--gold);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .kpi-label { font-size: 13px; color: var(--muted); font-weight: 600; }
+    .kpi-value { font-size: 21px; font-weight: 800; margin: 4px 0; }
+    .kpi-delta { font-size: 12px; color: var(--green-txt); font-weight: 700; }
+    .kpi-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      background: var(--gold-soft);
+      display: grid;
+      place-items: center;
+      font-size: 20px;
+    }
+
+    /* Grids e Cards */
+    .grid-main {
+      display: grid;
+      grid-template-columns: 1.85fr 1fr;
+      gap: 18px;
+      align-items: start;
+      margin-bottom: 18px;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px;
+      align-items: start;
+      margin-bottom: 18px;
+    }
+    .grid-bottom {
+      display: grid;
+      grid-template-columns: 1.35fr 1fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .card {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 18px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+      border: 1px solid #eef0f3;
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+    .card h2 { font-size: 17px; font-weight: 700; }
+
+    .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+    input, select, textarea {
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      padding: 8px 11px;
+      font-size: 13px;
+      background: #fff;
+      color: var(--text);
+    }
+    input:focus, select:focus, textarea:focus { outline: 2px solid var(--gold); border-color: var(--gold); }
+
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+    th { color: var(--muted); font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 0.3px; }
+
+    .af-cell { display: flex; align-items: center; gap: 9px; }
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #1f2937;
+      color: var(--gold);
+      font-weight: 800;
+      font-size: 12px;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+    .link-box { display: flex; align-items: center; gap: 6px; max-width: 210px; }
+    .link-text {
+      font-size: 12px;
+      color: #4b5563;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .badge {
+      padding: 4px 9px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      display: inline-block;
+    }
+    .badge-ativo { background: var(--green-bg); color: var(--green-txt); }
+    .badge-pendente { background: var(--yellow-bg); color: var(--yellow-txt); }
+    .badge-inativo { background: var(--red-bg); color: var(--red-txt); }
+
+    .actions { display: flex; gap: 5px; flex-wrap: wrap; }
+    .btn {
+      border: none;
+      border-radius: 7px;
+      padding: 6px 9px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+    .btn:hover { opacity: 0.9; }
+    .btn-copy { background: #f3f4f6; color: #374151; }
+    .btn-sale { background: #dcfce7; color: #166534; }
+    .btn-edit { background: var(--gold); color: #141619; }
+    .btn-del { background: #fee2e2; color: #991b1b; }
+    .btn-reset { background: #e5e7eb; color: #1f2937; }
+    .btn-primary {
+      width: 100%;
+      background: var(--gold);
+      color: #141619;
+      padding: 11px 14px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 800;
+      border: none;
+      cursor: pointer;
+      margin-top: 6px;
+    }
+    .btn-primary:hover { background: var(--gold-dark); }
+
+    .form { display: flex; flex-direction: column; gap: 11px; }
+    .form label { display: flex; flex-direction: column; gap: 5px; font-size: 13px; font-weight: 600; color: #374151; }
+    .code-row { display: flex; gap: 6px; }
+    .code-row input { flex: 1; }
+
+    canvas { width: 100%; height: 220px; display: block; }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #141619;
+      color: #fff;
+      border-left: 4px solid var(--gold);
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      opacity: 0;
+      transform: translateY(10px);
+      transition: 0.2s;
+      pointer-events: none;
+      z-index: 99;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 1100px) {
+      .kpis { grid-template-columns: repeat(2, 1fr); }
+      .grid-main, .grid-bottom, .grid-2 { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 720px) {
+      .sidebar { display: none; }
+      .sidebar.mobile-open { display: flex; position: fixed; z-index: 50; height: 100vh; }
+      .kpis { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <div>
+        <div class="brand">
+          <div class="brand-logo">🐝</div>
+          <div>
+            <div class="brand-title">CARBOMEL</div>
+            <div class="brand-sub">MEL PURO</div>
+          </div>
+        </div>
+        <nav class="menu" id="menuNav">
+          <button class="menu-btn" data-tab="Dashboard">🏠 Dashboard</button>
+          <button class="menu-btn" data-tab="Pedidos">📦 Pedidos</button>
+          <button class="menu-btn" data-tab="Produtos">🍯 Produtos</button>
+          <button class="menu-btn" data-tab="Estoque">📋 Estoque</button>
+          <button class="menu-btn" data-tab="Clientes">👤 Clientes</button>
+          <button class="menu-btn" data-tab="Financeiro">💰 Financeiro</button>
+          <button class="menu-btn active" data-tab="Afiliados">👥 Afiliados</button>
+          <button class="menu-btn" data-tab="Relatórios">📊 Relatórios</button>
+          <button class="menu-btn" data-tab="Configurações">⚙️ Configurações</button>
+          <button class="menu-btn" data-tab="Suporte">🎧 Suporte</button>
+          <button class="menu-btn" data-tab="Sair">🚪 Sair</button>
+        </nav>
+      </div>
+
+      <div class="sidebar-footer">
+        <p class="slogan">Juntos vamos mais longe!</p>
+        <small>CARBOMEL - Mel Puro<br/>Sistema de Gestão v1.0</small>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="hamburger" onclick="toggleSidebar()">☰</button>
+          <strong>CARBOMEL</strong>
+          <span class="divider">|</span>
+          <span>Mel Puro</span>
+        </div>
+        <div class="topbar-right">
+          <div class="date-box" id="dataBox"></div>
+          <button class="notif-btn" onclick="showToast('3 notificações: 2 comissões aguardando revisão e 1 novo afiliado.')">
+            🔔<span class="notif-badge">3</span>
+          </button>
+          <div class="admin-box">👤 Administrador ▾</div>
+        </div>
+      </header>
+
+      <section class="content">
+        <div class="page-header">
+          <div>
+            <h1 id="pageTitle">👥 Afiliados</h1>
+            <p id="pageSubtitle">Gerencie seus afiliados e acompanhe as vendas geradas por eles.</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn btn-sale" onclick="simularVendaRapida()">⚡ Simular Venda (+R$ 149,90)</button>
+            <button class="btn btn-reset" onclick="restaurarPadrao()">↺ Restaurar dados</button>
+          </div>
+        </div>
+
+        <!-- TELA 1: AFILIADOS -->
+        <div class="view-section active" id="view-Afiliados">
+          <div class="kpis">
+            <div class="kpi-card">
+              <div>
+                <div class="kpi-label">Afiliados Ativos</div>
+                <div class="kpi-value" id="kpiAtivos">0</div>
+                <div class="kpi-delta">↑ +12%</div>
+              </div>
+              <div class="kpi-icon">👥</div>
+            </div>
+            <div class="kpi-card">
+              <div>
+                <div class="kpi-label">Vendas por Afiliados</div>
+                <div class="kpi-value" id="kpiVendas">R$ 0,00</div>
+                <div class="kpi-delta">↑ +18%</div>
+              </div>
+              <div class="kpi-icon">🛒</div>
+            </div>
+            <div class="kpi-card">
+              <div>
+                <div class="kpi-label">Comissões Pendentes</div>
+                <div class="kpi-value" id="kpiPendentes">R$ 0,00</div>
+                <div class="kpi-delta">↑ +10%</div>
+              </div>
+              <div class="kpi-icon">💳</div>
+            </div>
+            <div class="kpi-card">
+              <div>
+                <div class="kpi-label">Comissões Pagas</div>
+                <div class="kpi-value" id="kpiPagas">R$ 0,00</div>
+                <div class="kpi-delta">↑ +22%</div>
+              </div>
+              <div class="kpi-icon">✅</div>
+            </div>
+          </div>
+
+          <div class="grid-main">
+            <div class="card">
+              <div class="card-header">
+                <h2>☰ Lista de Afiliados</h2>
+                <div class="filters">
+                  <input type="text" id="buscaInput" placeholder="🔍 Buscar afiliado..." />
+                  <select id="statusSelect">
+                    <option value="Todos os status">Todos os status</option>
+                    <option value="Ativo">Ativo</option>
+                    <option value="Pendente">Pendente</option>
+                    <option value="Inativo">Inativo</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Afiliado</th>
+                      <th>Link exclusivo</th>
+                      <th>Cliques</th>
+                      <th>Vendas</th>
+                      <th>Comissão</th>
+                      <th>Status</th>
+                      <th>Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tabelaAfiliados"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="card">
+              <h2>⊕ Cadastrar Afiliado</h2>
+              <form id="formAfiliado" class="form">
+                <label>Nome Completo *
+                  <input type="text" id="nomeCompleto" placeholder="Digite o nome do afiliado" required />
+                </label>
+                <label>Telefone / WhatsApp *
+                  <input type="text" id="telefone" placeholder="(71) 98765-4321" required />
+                </label>
+                <label>E-mail *
+                  <input type="email" id="email" placeholder="exemplo@email.com" required />
+                </label>
+                <label>Percentual de Comissão *
+                  <select id="percentualComissao">
+                    <option value="10">10%</option>
+                    <option value="15" selected>15%</option>
+                    <option value="20">20%</option>
+                    <option value="25">25%</option>
+                  </select>
+                </label>
+                <label>Código do Afiliado
+                  <div class="code-row">
+                    <input type="text" id="codigo" placeholder="AUTO1234" />
+                    <button type="button" class="btn btn-copy" onclick="gerarCodigo()">Gerar</button>
+                  </div>
+                </label>
+                <button type="submit" class="btn-primary">⊕ Cadastrar Afiliado</button>
+              </form>
+            </div>
+          </div>
+
+          <div class="grid-bottom">
+            <div class="card">
+              <div class="card-header">
+                <h2>📈 Vendas por Afiliados (Últimos 30 Dias)</h2>
+                <span class="badge badge-ativo" id="destaqueGrafico">R$ 0,00</span>
+              </div>
+              <canvas id="graficoVendas" width="600" height="220"></canvas>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <h2>⚡ Últimas Conversões</h2>
+                <button class="btn btn-copy" onclick="renderizarTudo()">Atualizar</button>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Data</th>
+                      <th>Afiliado</th>
+                      <th>Pedido</th>
+                      <th>Valor</th>
+                      <th>Comissão</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tabelaConversoes"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TELA 2: DASHBOARD -->
+        <div class="view-section" id="view-Dashboard">
+          <div class="kpis">
+            <div class="kpi-card">
+              <div>
+                <div class="kpi-label">Faturamento Total</div>
+                <div class="kpi-value" id="dashFaturamento">R$ 0,00</div>
+                <div class="kpi-delta">↑ +15%</div>
+              </div>
+              <div class="kpi-icon">🍯</div>
+            </div>
+            <div class="kpi-card">
+              <div>
+                <div class="kpi-label">Pedidos no Mês</div>
+                <div class="kpi-value">148</div>
+                <div class="kpi-delta">↑ +9%</div>
+              </div>
+              <div class="kpi-icon">📦</div>
+            </div>
+            <div class="kpi-card">
+              <div>
+                <div class="kpi-label">Afiliados Ativos</div>
+                <div class="kpi-value" id="dashAfiliados">0</div>
+                <div class="kpi-delta">↑ +12%</div>
+              </div>
+              <div class="kpi-icon">👥</div>
+            </div>
+            <div class="kpi-card">
+              <div>
+                <div class="kpi-label">Itens em Estoque</div>
+                <div class="kpi-value">640 potes</div>
+                <div class="kpi-delta">↑ Saudável</div>
+              </div>
+              <div class="kpi-icon">📋</div>
+            </div>
+          </div>
+          <div class="card">
+            <h2>Resumo Operacional — CARBOMEL | Mel Puro</h2>
+            <p style="margin-top:8px;color:#4b5563;font-size:14px;">
+              Use o menu lateral para navegar entre <strong>Afiliados</strong>, <strong>Produtos</strong>, <strong>Estoque</strong>, <strong>Pedidos</strong>, <strong>Financeiro</strong> e <strong>Configurações</strong>.
+            </p>
+          </div>
+        </div>
+
+        <!-- TELA 3: PEDIDOS -->
+        <div class="view-section" id="view-Pedidos">
+          <div class="card">
+            <div class="card-header">
+              <h2>📦 Pedidos Recentes</h2>
+              <button class="btn btn-sale" onclick="simularVendaRapida(); renderizarPedidos();">+ Novo Pedido via Afiliado</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>Pedido</th><th>Data</th><th>Afiliado / Origem</th><th>Valor</th><th>Comissão</th></tr>
+                </thead>
+                <tbody id="tabelaPedidos"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- TELA 4: PRODUTOS -->
+        <div class="view-section" id="view-Produtos">
+          <div class="card">
+            <h2>🍯 Catálogo de Produtos — Mel Puro</h2>
+            <div class="table-wrap" style="margin-top:12px;">
+              <table>
+                <thead>
+                  <tr><th>Produto</th><th>Embalagem</th><th>Preço</th><th>Comissão</th><th>Status</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><strong>Mel Silvestre Puro</strong></td><td>Vidro 500g</td><td>R$ 49,90</td><td>15%</td><td><span class="badge badge-ativo">Disponível</span></td></tr>
+                  <tr><td><strong>Mel de Flor de Laranjeira</strong></td><td>Vidro 1kg</td><td>R$ 89,90</td><td>15%</td><td><span class="badge badge-ativo">Disponível</span></td></tr>
+                  <tr><td><strong>Kit Degustação Carbomel</strong></td><td>3x 300g</td><td>R$ 149,90</td><td>20%</td><td><span class="badge badge-ativo">Destaque</span></td></tr>
+                  <tr><td><strong>Própolis Verde Extrato</strong></td><td>Frasco 30ml</td><td>R$ 39,90</td><td>15%</td><td><span class="badge badge-pendente">Baixo giro</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- TELA 5: ESTOQUE -->
+        <div class="view-section" id="view-Estoque">
+          <div class="card">
+            <div class="card-header">
+              <h2>📋 Controle de Estoque</h2>
+              <button class="btn btn-edit" onclick="showToast('Inventário conferido com sucesso.')">Conferir Lote</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>Lote</th><th>Produto</th><th>Quantidade</th><th>Validade</th><th>Situação</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>#L2026-01</td><td>Mel Silvestre Puro 500g</td><td><strong>280 un</strong></td><td>10/2027</td><td><span class="badge badge-ativo">OK</span></td></tr>
+                  <tr><td>#L2026-02</td><td>Mel de Flor de Laranjeira 1kg</td><td><strong>195 un</strong></td><td>11/2027</td><td><span class="badge badge-ativo">OK</span></td></tr>
+                  <tr><td>#L2026-03</td><td>Kit Degustação Carbomel</td><td><strong>65 kits</strong></td><td>09/2027</td><td><span class="badge badge-pendente">Atenção</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- TELA 6: CLIENTES -->
+        <div class="view-section" id="view-Clientes">
+          <div class="card">
+            <h2>👤 Base de Clientes</h2>
+            <div class="table-wrap" style="margin-top:12px;">
+              <table>
+                <thead>
+                  <tr><th>Cliente</th><th>Cidade</th><th>Compras</th><th>Total Gasto</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><strong>Mariana Rocha</strong></td><td>Salvador - BA</td><td>4</td><td>R$ 549,60</td></tr>
+                  <tr><td><strong>Pedro Henrique</strong></td><td>Feira de Santana - BA</td><td>2</td><td>R$ 239,80</td></tr>
+                  <tr><td><strong>Camila Almeida</strong></td><td>Lauro de Freitas - BA</td><td>3</td><td>R$ 389,70</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- TELA 7: FINANCEIRO -->
+        <div class="view-section" id="view-Financeiro">
+          <div class="grid-2">
+            <div class="card">
+              <h2>💰 Resumo Financeiro de Comissões</h2>
+              <p style="margin-top:10px;font-size:14px;">Vendas geradas por afiliados: <strong id="finVendas">R$ 0,00</strong></p>
+              <p style="margin-top:6px;font-size:14px;">Comissões pendentes: <strong id="finPendentes">R$ 0,00</strong></p>
+              <p style="margin-top:6px;font-size:14px;">Comissões pagas: <strong id="finPagas">R$ 0,00</strong></p>
+            </div>
+            <div class="card">
+              <h2>🏦 Repasse Rápido</h2>
+              <p style="margin-top:10px;color:#4b5563;font-size:13px;">
+                Ative um afiliado na aba <strong>Afiliados</strong> para mover o status de <em>Pendente</em> para <em>Ativo</em> e atualizar o cálculo de comissões.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- TELA 8: RELATÓRIOS -->
+        <div class="view-section" id="view-Relatórios">
+          <div class="card">
+            <div class="card-header">
+              <h2>📊 Relatório de Performance</h2>
+              <button class="btn btn-copy" onclick="showToast('Relatório exportado para a sessão atual.')">Exportar Resumo</button>
+            </div>
+            <p style="color:#4b5563;font-size:14px;">
+              Total de afiliados cadastrados: <strong id="relTotalAfiliados">0</strong> • Conversões registradas: <strong id="relTotalConversoes">0</strong>.
+            </p>
+          </div>
+        </div>
+
+        <!-- TELA 9: CONFIGURAÇÕES -->
+        <div class="view-section" id="view-Configurações">
+          <div class="card" style="max-width:560px;">
+            <h2>⚙️ Configurações do Sistema</h2>
+            <form id="formConfig" class="form" style="margin-top:12px;">
+              <label>Nome da Empresa
+                <input type="text" id="cfgEmpresa" value="CARBOMEL | Mel Puro" />
+              </label>
+              <label>Slogan do Rodapé
+                <input type="text" id="cfgSlogan" value="Juntos vamos mais longe!" />
+              </label>
+              <label>Comissão Padrão (%)
+                <select id="cfgComissaoPadrao">
+                  <option value="10">10%</option>
+                  <option value="15" selected>15%</option>
+                  <option value="20">20%</option>
+                </select>
+              </label>
+              <button type="submit" class="btn-primary">Salvar Configurações</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- TELA 10: SUPORTE -->
+        <div class="view-section" id="view-Suporte">
+          <div class="card" style="max-width:560px;">
+            <h2>🎧 Central de Suporte</h2>
+            <form id="formSuporte" class="form" style="margin-top:12px;">
+              <label>Assunto
+                <input type="text" id="supAssunto" placeholder="Ex.: Dúvida sobre comissão ou link" required />
+              </label>
+              <label>Mensagem
+                <textarea id="supMsg" rows="4" placeholder="Descreva sua solicitação..." required></textarea>
+              </label>
+              <button type="submit" class="btn-primary">Enviar Mensagem</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- TELA 11: SAIR -->
+        <div class="view-section" id="view-Sair">
+          <div class="card" style="max-width:480px;">
+            <h2>🚪 Encerrar Sessão</h2>
+            <p style="margin-top:8px;color:#4b5563;font-size:14px;">
+              Deseja voltar para a tela principal de <strong>Afiliados</strong>?
+            </p>
+            <button class="btn-primary" style="margin-top:14px;" onclick="abrirAba('Afiliados')">Voltar para Afiliados</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const STORAGE_KEY = "carbomel_afiliados_v1";
+
+    const dadosIniciais = () => {
+      const baseLink = window.location.href.split("?")[0].split("#")[0];
+      const criarAf = (id, nomeCompleto, telefone, email, percentualComissao, codigo, cliques, vendasQtd, vendasValor, status) => ({
+        id,
+        nomeCompleto,
+        telefone,
+        email,
+        percentualComissao,
+        codigo,
+        linkExclusivo: `${baseLink}?ref=${encodeURIComponent(codigo)}`,
+        cliques,
+        vendasQtd,
+        vendasValor,
+        comissaoAcumulada: vendasValor * (percentualComissao / 100),
+        status
+      });
+
+      return {
+        nextId: 6,
+        nextPedido: 2459,
+        afiliados: [
+          criarAf(1, "Carlos Souza", "(71) 98765-4321", "carlos@carbomel.com.br", 15, "CARLOS15", 2480, 96, 12800.00, "Ativo"),
+          criarAf(2, "Juliana Santos", "(71) 99123-4567", "juliana@carbomel.com.br", 15, "JULIANA15", 1870, 72, 9600.00, "Ativo"),
+          criarAf(3, "Roberto Silva", "(71) 98456-7890", "roberto@carbomel.com.br", 15, "ROBERTO15", 1250, 48, 6400.00, "Ativo"),
+          criarAf(4, "Luciana Oliveira", "(71) 99988-7766", "luciana@carbomel.com.br", 15, "LUCIANA15", 680, 29, 3866.67, "Pendente"),
+          criarAf(5, "Diego Pereira", "(71) 98111-2233", "diego@carbomel.com.br", 15, "DIEGO15", 420, 17, 2266.67, "Inativo")
+        ],
+        conversoes: [
+          { dataHora: "17/11/2026 14:32", afiliadoNome: "Juliana Santos", pedido: "#0002458", valor: 149.90, comissao: 22.49 },
+          { dataHora: "17/11/2026 13:50", afiliadoNome: "Carlos Souza", pedido: "#0002457", valor: 199.90, comissao: 29.99 },
+          { dataHora: "16/11/2026 20:15", afiliadoNome: "Roberto Silva", pedido: "#0002456", valor: 129.90, comissao: 19.49 },
+          { dataHora: "16/11/2026 17:20", afiliadoNome: "Luciana Oliveira", pedido: "#0002455", valor: 89.90, comissao: 13.49 }
+        ]
+      };
+    };
+
+    let state = carregarEstado();
+    let abaAtual = "Afiliados";
+
+    const metaAbas = {
+      Dashboard: { titulo: "🏠 Dashboard", subtitulo: "Visão geral de vendas, pedidos e operações da CARBOMEL." },
+      Pedidos: { titulo: "📦 Pedidos", subtitulo: "Acompanhe os pedidos gerados e as comissões atribuídas." },
+      Produtos: { titulo: "🍯 Produtos", subtitulo: "Gerencie o catálogo de méis e produtos da CARBOMEL." },
+      Estoque: { titulo: "📋 Estoque", subtitulo: "Controle de lotes, quantidades e validade." },
+      Clientes: { titulo: "👤 Clientes", subtitulo: "Histórico de clientes e compras realizadas." },
+      Financeiro: { titulo: "💰 Financeiro", subtitulo: "Controle de faturamento e comissões dos afiliados." },
+      Afiliados: { titulo: "👥 Afiliados", subtitulo: "Gerencie seus afiliados e acompanhe as vendas geradas por eles." },
+      Relatórios: { titulo: "📊 Relatórios", subtitulo: "Indicadores consolidados do programa de afiliados." },
+      Configurações: { titulo: "⚙️ Configurações", subtitulo: "Ajustes gerais da marca e regras de comissão." },
+      Suporte: { titulo: "🎧 Suporte", subtitulo: "Fale com o suporte do sistema." },
+      Sair: { titulo: "🚪 Sair", subtitulo: "Gerenciar sessão do administrador." }
+    };
+
+    function carregarEstado() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && Array.isArray(parsed.afiliados)) return parsed;
+        }
+      } catch (e) {}
+      const inicial = dadosIniciais();
+      salvarEstado(inicial);
+      return inicial;
+    }
+
+    function salvarEstado(s = state) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+    }
+
+    function restaurarPadrao() {
+      state = dadosIniciais();
+      salvarEstado();
+      showToast("Dados padrão restaurados.");
+      renderizarTudo();
+    }
+
+    const fmtBRL = (v) => Number(v || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+    function showToast(msg) {
+      const el = document.getElementById("toast");
+      el.textContent = msg;
+      el.classList.add("show");
+      setTimeout(() => el.classList.remove("show"), 2600);
+    }
+
+    function toggleSidebar() {
+      document.getElementById("sidebar").classList.toggle("mobile-open");
+    }
+
+    function abrirAba(tab) {
+      abaAtual = tab;
+      document.querySelectorAll(".menu-btn").forEach((b) => {
+        b.classList.toggle("active", b.dataset.tab === tab);
+      });
+
+      const meta = metaAbas[tab] || metaAbas.Afiliados;
+      document.getElementById("pageTitle").textContent = meta.titulo;
+      document.getElementById("pageSubtitle").textContent = meta.subtitulo;
+
+      document.querySelectorAll(".view-section").forEach((sec) => {
+        sec.classList.toggle("active", sec.id === "view-" + tab);
+      });
+
+      document.getElementById("sidebar").classList.remove("mobile-open");
+      renderizarTudo();
+    }
+
+    function atualizarData() {
+      const agora = new Date();
+      const dataStr = agora.toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" });
+      const dia = agora.toLocaleDateString("pt-BR", { weekday: "long" });
+      document.getElementById("dataBox").innerHTML =
+        `<strong>${dataStr}</strong><br/><small>${dia.charAt(0).toUpperCase() + dia.slice(1)}</small>`;
+    }
+
+    function registrarCliquePorQuery() {
+      const params = new URLSearchParams(window.location.search);
+      const ref = params.get("ref");
+      if (!ref) return;
+      const af = state.afiliados.find((a) => a.codigo.toLowerCase() === ref.toLowerCase());
+      if (af) {
+        af.cliques = Number(af.cliques || 0) + 1;
+        salvarEstado();
+        showToast(`Clique contabilizado para ${af.nomeCompleto} (${af.codigo})!`);
+      }
+    }
+
+    function gerarCodigo() {
+      const num = Math.floor(1000 + Math.random() * 9000);
+      document.getElementById("codigo").value = "MEL" + num;
+    }
+
+    function iniciais(nome) {
+      return (nome || "AF")
+        .split(" ")
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((p) => p[0].toUpperCase())
+        .join("");
+    }
+
+    function calcularTotais() {
+      const ativos = state.afiliados.filter((a) => a.status === "Ativo").length;
+      const vendasTotal = state.afiliados.reduce((acc, a) => acc + Number(a.vendasValor || 0), 0);
+      const comissaoTotal = state.afiliados.reduce((acc, a) => acc + Number(a.comissaoAcumulada || 0), 0);
+      const pendentes = state.afiliados
+        .filter((a) => a.status !== "Ativo")
+        .reduce((acc, a) => acc + Number(a.comissaoAcumulada || 0), 0);
+      const pagas = Math.max(0, comissaoTotal - pendentes);
+      return { ativos, vendasTotal, pendentes, pagas };
+    }
+
+    function renderizarKpis() {
+      const { ativos, vendasTotal, pendentes, pagas } = calcularTotais();
+
+      document.getElementById("kpiAtivos").textContent = ativos;
+      document.getElementById("kpiVendas").textContent = fmtBRL(vendasTotal);
+      document.getElementById("kpiPendentes").textContent = fmtBRL(pendentes);
+      document.getElementById("kpiPagas").textContent = fmtBRL(pagas);
+      document.getElementById("destaqueGrafico").textContent = fmtBRL(vendasTotal);
+
+      document.getElementById("dashFaturamento").textContent = fmtBRL(vendasTotal + 18500);
+      document.getElementById("dashAfiliados").textContent = ativos;
+      document.getElementById("finVendas").textContent = fmtBRL(vendasTotal);
+      document.getElementById("finPendentes").textContent = fmtBRL(pendentes);
+      document.getElementById("finPagas").textContent = fmtBRL(pagas);
+      document.getElementById("relTotalAfiliados").textContent = state.afiliados.length;
+      document.getElementById("relTotalConversoes").textContent = state.conversoes.length;
+
+      if (abaAtual === "Afiliados") {
+        desenharGrafico(vendasTotal);
+      }
+    }
+
+    function renderizarAfiliados() {
+      const busca = document.getElementById("buscaInput").value.trim().toLowerCase();
+      const status = document.getElementById("statusSelect").value;
+
+      const lista = state.afiliados.filter((a) => {
+        const matchBusca =
+          !busca ||
+          a.nomeCompleto.toLowerCase().includes(busca) ||
+          a.codigo.toLowerCase().includes(busca) ||
+          a.email.toLowerCase().includes(busca);
+        const matchStatus = status === "Todos os status" || a.status === status;
+        return matchBusca && matchStatus;
+      });
+
+      const tbody = document.getElementById("tabelaAfiliados");
+      tbody.innerHTML = "";
+
+      if (lista.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:#6b7280;padding:18px;">Nenhum afiliado encontrado.</td></tr>`;
+        return;
+      }
+
+      lista.forEach((a) => {
+        const badgeClass =
+          a.status === "Ativo" ? "badge-ativo" : a.status === "Pendente" ? "badge-pendente" : "badge-inativo";
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>
+            <div class="af-cell">
+              <div class="avatar">${iniciais(a.nomeCompleto)}</div>
+              <div>
+                <strong>${escapeHtml(a.nomeCompleto)}</strong><br/>
+                <small style="color:#6b7280">${escapeHtml(a.codigo)} • ${a.percentualComissao}%</small>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="link-box">
+              <span class="link-text" title="${escapeHtml(a.linkExclusivo)}">${escapeHtml(a.linkExclusivo)}</span>
+              <button class="btn btn-copy" title="Copiar link" onclick="copiarLink('${escapeJs(a.linkExclusivo)}')">📋</button>
+            </div>
+          </td>
+          <td>${Number(a.cliques).toLocaleString("pt-BR")}</td>
+          <td><strong>${a.vendasQtd}</strong></td>
+          <td><strong>${fmtBRL(a.comissaoAcumulada)}</strong></td>
+          <td><span class="badge ${badgeClass}">${escapeHtml(a.status)}</span></td>
+          <td>
+            <div class="actions">
+              <button class="btn btn-sale" title="Registrar venda de R$ 149,90" onclick="registrarVenda(${a.id})">+Venda</button>
+              <button class="btn btn-edit" title="Alternar status" onclick="alternarStatus(${a.id})">Editar</button>
+              <button class="btn btn-del" title="Excluir afiliado" onclick="excluirAfiliado(${a.id})">✕</button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderizarConversoes() {
+      const tbody = document.getElementById("tabelaConversoes");
+      tbody.innerHTML = "";
+
+      state.conversoes.slice(0, 6).forEach((c) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><small>${escapeHtml(c.dataHora)}</small></td>
+          <td>${escapeHtml(c.afiliadoNome)}</td>
+          <td><strong>${escapeHtml(c.pedido)}</strong></td>
+          <td>${fmtBRL(c.valor)}</td>
+          <td style="color:#166534;font-weight:700;">${fmtBRL(c.comissao)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderizarPedidos() {
+      const tbody = document.getElementById("tabelaPedidos");
+      if (!tbody) return;
+      tbody.innerHTML = "";
+
+      state.conversoes.forEach((c) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><strong>${escapeHtml(c.pedido)}</strong></td>
+          <td>${escapeHtml(c.dataHora)}</td>
+          <td>${escapeHtml(c.afiliadoNome)}</td>
+          <td>${fmtBRL(c.valor)}</td>
+          <td style="color:#166534;font-weight:700;">${fmtBRL(c.comissao)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function copiarLink(link) {
+      navigator.clipboard?.writeText(link);
+      showToast("Link copiado: " + link);
+    }
+
+    function registrarVenda(id, valorVenda = 149.90) {
+      const af = state.afiliados.find((a) => a.id === id);
+      if (!af) return;
+
+      const comissaoGerada = valorVenda * (Number(af.percentualComissao) / 100);
+      af.vendasQtd = Number(af.vendasQtd || 0) + 1;
+      af.vendasValor = Number(af.vendasValor || 0) + valorVenda;
+      af.comissaoAcumulada = Number(af.comissaoAcumulada || 0) + comissaoGerada;
+
+      const agora = new Date();
+      const dataHora = `${String(agora.getDate()).padStart(2, "0")}/${String(agora.getMonth() + 1).padStart(2, "0")}/${agora.getFullYear()} ${String(agora.getHours()).padStart(2, "0")}:${String(agora.getMinutes()).padStart(2, "0")}`;
+      const numPedido = state.nextPedido++;
+
+      state.conversoes.unshift({
+        dataHora,
+        afiliadoNome: af.nomeCompleto,
+        pedido: "#" + String(numPedido).padStart(7, "0"),
+        valor: valorVenda,
+        comissao: comissaoGerada
+      });
+      if (state.conversoes.length > 30) state.conversoes.pop();
+
+      salvarEstado();
+      showToast(`Venda de ${fmtBRL(valorVenda)} registrada para ${af.nomeCompleto}!`);
+      renderizarTudo();
+    }
+
+    function simularVendaRapida() {
+      const ativo = state.afiliados.find((a) => a.status === "Ativo") || state.afiliados[0];
+      if (!ativo) {
+        showToast("Cadastre um afiliado primeiro.");
+        return;
+      }
+      registrarVenda(ativo.id, 149.90);
+    }
+
+    function alternarStatus(id) {
+      const af = state.afiliados.find((a) => a.id === id);
+      if (!af) return;
+      af.status = af.status === "Ativo" ? "Pendente" : af.status === "Pendente" ? "Inativo" : "Ativo";
+      salvarEstado();
+      showToast(`Status de ${af.nomeCompleto} alterado para ${af.status}.`);
+      renderizarTudo();
+    }
+
+    function excluirAfiliado(id) {
+      const af = state.afiliados.find((a) => a.id === id);
+      if (!af) return;
+      if (!confirm(`Deseja remover o afiliado ${af.nomeCompleto}?`)) return;
+      state.afiliados = state.afiliados.filter((a) => a.id !== id);
+      salvarEstado();
+      showToast(`Afiliado ${af.nomeCompleto} removido.`);
+      renderizarTudo();
+    }
+
+    document.getElementById("formAfiliado").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const id = state.nextId++;
+      const pct = Number(document.getElementById("percentualComissao").value) || 15;
+      const codDigitado = document.getElementById("codigo").value.trim().toUpperCase();
+      const codigo = codDigitado || ("AUTO" + (1000 + id));
+      const baseLink = window.location.href.split("?")[0].split("#")[0];
+
+      state.afiliados.push({
+        id,
+        nomeCompleto: document.getElementById("nomeCompleto").value.trim(),
+        telefone: document.getElementById("telefone").value.trim(),
+        email: document.getElementById("email").value.trim(),
+        percentualComissao: pct,
+        codigo,
+        linkExclusivo: `${baseLink}?ref=${encodeURIComponent(codigo)}`,
+        cliques: 0,
+        vendasQtd: 0,
+        vendasValor: 0,
+        comissaoAcumulada: 0,
+        status: "Ativo"
+      });
+
+      salvarEstado();
+      e.target.reset();
+      showToast("Afiliado cadastrado com sucesso!");
+      renderizarTudo();
+    });
+
+    document.getElementById("formConfig")?.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const slogan = document.getElementById("cfgSlogan").value.trim();
+      const comissaoPadrao = document.getElementById("cfgComissaoPadrao").value;
+      if (slogan) {
+        document.querySelector(".slogan").textContent = slogan;
+      }
+      document.getElementById("percentualComissao").value = comissaoPadrao;
+      showToast("Configurações salvas!");
+    });
+
+    document.getElementById("formSuporte")?.addEventListener("submit", (e) => {
+      e.preventDefault();
+      showToast("Mensagem enviada ao suporte!");
+      e.target.reset();
+    });
+
+    document.querySelectorAll(".menu-btn").forEach((btn) => {
+      btn.addEventListener("click", () => abrirAba(btn.dataset.tab));
+    });
+
+    function desenharGrafico(totalAtual) {
+      const canvas = document.getElementById("graficoVendas");
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+      const w = canvas.width;
+      const h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+
+      const base = Math.max(totalAtual, 1000);
+      const fatores = [0.22, 0.35, 0.30, 0.48, 0.42, 0.65, 0.58, 0.76, 0.72, 0.88, 0.82, 1.0];
+      const pontos = fatores.map((f) => base * f);
+      const maxVal = Math.max(...pontos) * 1.15;
+
+      const padL = 48, padR = 20, padT = 18, padB = 28;
+      const plotW = w - padL - padR;
+      const plotH = h - padT - padB;
+
+      ctx.strokeStyle = "#e5e7eb";
+      ctx.lineWidth = 1;
+      ctx.font = "11px sans-serif";
+      ctx.fillStyle = "#6b7280";
+      for (let i = 0; i <= 4; i++) {
+        const y = padT + (plotH * i) / 4;
+        ctx.beginPath();
+        ctx.moveTo(padL, y);
+        ctx.lineTo(w - padR, y);
+        ctx.stroke();
+
+        const val = maxVal * (1 - i / 4);
+        ctx.fillText(Math.round(val / 1000) + "k", 8, y + 4);
+      }
+
+      const coords = pontos.map((v, idx) => {
+        const x = padL + (plotW * idx) / (pontos.length - 1);
+        const y = padT + plotH - (v / maxVal) * plotH;
+        return { x, y };
+      });
+
+      const grad = ctx.createLinearGradient(0, padT, 0, h - padB);
+      grad.addColorStop(0, "rgba(245, 183, 0, 0.35)");
+      grad.addColorStop(1, "rgba(245, 183, 0, 0.0)");
+
+      ctx.beginPath();
+      ctx.moveTo(coords[0].x, h - padB);
+      coords.forEach((p) => ctx.lineTo(p.x, p.y));
+      ctx.lineTo(coords[coords.length - 1].x, h - padB);
+      ctx.closePath();
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      ctx.beginPath();
+      coords.forEach((p, idx) => (idx === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y)));
+      ctx.strokeStyle = "#f5b700";
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      coords.forEach((p) => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+        ctx.fillStyle = "#d99b00";
+        ctx.fill();
+      });
+
+      const labels = ["18/10", "25/10", "01/11", "08/11", "15/11", "Hoje"];
+      labels.forEach((lbl, idx) => {
+        const x = padL + (plotW * idx) / (labels.length - 1);
+        ctx.fillStyle = "#6b7280";
+        ctx.fillText(lbl, x - 12, h - 8);
+      });
+    }
+
+    function escapeHtml(s) {
+      return String(s || "").replace(/[&<>"']/g, (c) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      }[c]));
+    }
+
+    function escapeJs(s) {
+      return String(s || "").replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+    }
+
+    function renderizarTudo() {
+      renderizarKpis();
+      renderizarAfiliados();
+      renderizarConversoes();
+      renderizarPedidos();
+    }
+
+    document.getElementById("buscaInput").addEventListener("input", renderizarAfiliados);
+    document.getElementById("statusSelect").addEventListener("change", renderizarAfiliados);
+
+    atualizarData();
+    registrarCliquePorQuery();
+    renderizarTudo();
+  </script>
+</body>
+</html>
