@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CARBOMEL | Mel Puro — Sistema de Gestão v1.0</title>
-  <link id="faviconLink" rel="icon" type="image/png" href="./logo.png" />
   <style>
     :root {
       --bg: #f3f4f6;
@@ -51,22 +50,18 @@
       padding-bottom: 14px;
     }
     .brand-logo {
-      width: 52px;
-      height: 52px;
+      width: 48px;
+      height: 48px;
       border-radius: 50%;
-      background: #ffffff;
-      padding: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       overflow: hidden;
       flex-shrink: 0;
-      box-shadow: 0 0 0 2px #141619, 0 0 0 4px var(--gold);
+      background: #141619;
+      box-shadow: 0 0 0 2px #141619, 0 0 0 3px var(--gold);
     }
     .brand-logo img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: cover;
       display: block;
     }
     .brand-title { font-weight: 900; color: var(--gold); font-size: 16px; letter-spacing: 0.5px; }
@@ -353,7 +348,7 @@
       <div>
         <div class="brand">
           <div class="brand-logo">
-            <img id="brandLogoImg" src="./logo.png" alt="CARBOMEL - Mel Puro" />
+            <img src="./logo.png" alt="Logo CARBOMEL Mel Puro" />
           </div>
           <div>
             <div class="brand-title">CARBOMEL</div>
