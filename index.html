@@ -307,8 +307,46 @@
 
     .form { display: flex; flex-direction: column; gap: 11px; }
     .form label { display: flex; flex-direction: column; gap: 5px; font-size: 13px; font-weight: 600; color: #374151; }
+    .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .code-row { display: flex; gap: 6px; }
     .code-row input { flex: 1; }
+
+    /* Vitrine da Loja / Carrinho */
+    .vitrine-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 14px;
+    }
+    .prod-card {
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 14px;
+      background: #fafafa;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .prod-preco { font-size: 18px; font-weight: 900; color: #111827; margin-top: 4px; }
+    .prod-meta { font-size: 12px; color: var(--muted); }
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 0;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 13px;
+    }
+    .pay-box {
+      background: #fefce8;
+      border: 1px solid #fde047;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 12px;
+      color: #374151;
+      line-height: 1.45;
+    }
 
     canvas { width: 100%; height: 220px; display: block; }
 
@@ -339,7 +377,7 @@
     @media (max-width: 720px) {
       .sidebar { display: none; }
       .sidebar.mobile-open { display: flex; position: fixed; z-index: 50; height: 100vh; }
-      .kpis { grid-template-columns: 1fr; }
+      .kpis, .form-row-2 { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -358,6 +396,7 @@
         </div>
         <nav class="menu" id="menuNav">
           <button class="menu-btn" data-tab="Dashboard">🏠 Dashboard</button>
+          <button class="menu-btn" data-tab="Loja">🛍️ Loja / Vender</button>
           <button class="menu-btn" data-tab="Pedidos">📦 Pedidos</button>
           <button class="menu-btn" data-tab="Produtos">🍯 Produtos</button>
           <button class="menu-btn" data-tab="Estoque">📋 Estoque</button>
@@ -387,6 +426,9 @@
         </div>
         <div class="topbar-right">
           <div class="date-box" id="dataBox"></div>
+          <button class="notif-btn" onclick="abrirAba('Loja')">
+            🛍️<span class="notif-badge" id="badgeCarrinho">0</span>
+          </button>
           <button class="notif-btn" onclick="showToast('3 notificações: 2 comissões aguardando revisão e 1 novo afiliado.')">
             🔔<span class="notif-badge">3</span>
           </button>
@@ -401,8 +443,59 @@
             <p id="pageSubtitle">Gerencie seus afiliados e acompanhe as vendas geradas por eles.</p>
           </div>
           <div class="header-actions">
+            <button class="btn btn-edit" onclick="abrirAba('Loja')">🛍️ Comprar / Vender na Loja</button>
             <button class="btn btn-sale" onclick="simularVendaRapida()">⚡ Simular Venda (+R$ 149,90)</button>
             <button class="btn btn-reset" onclick="restaurarPadrao()">↺ Restaurar dados</button>
+          </div>
+        </div>
+
+        <!-- LOJA / COMPRA DIRETA E PAGAMENTO -->
+        <div class="view-section" id="view-Loja">
+          <div class="grid-main">
+            <div class="card">
+              <div class="card-header">
+                <h2>🍯 Vitrine de Produtos — Compra Direta</h2>
+                <span class="badge badge-ativo" id="refAtivoBadge">Sem afiliado</span>
+              </div>
+              <div class="vitrine-grid" id="vitrineProdutos"></div>
+            </div>
+
+            <div class="card">
+              <h2>🛒 Carrinho e Pagamento</h2>
+              <div id="listaCarrinho" style="margin:12px 0;"></div>
+              <div style="display:flex;justify-content:space-between;font-size:16px;font-weight:800;margin-bottom:12px;">
+                <span>Total do Pedido:</span>
+                <span id="totalCarrinho">R$ 0,00</span>
+              </div>
+
+              <form id="formCheckout" class="form">
+                <label>Nome do Cliente *
+                  <input type="text" id="chkClienteNome" placeholder="Nome completo" required />
+                </label>
+                <div class="form-row-2">
+                  <label>Telefone / WhatsApp
+                    <input type="text" id="chkClienteFone" placeholder="(71) 99999-0000" />
+                  </label>
+                  <label>Cidade
+                    <input type="text" id="chkClienteCidade" placeholder="Salvador - BA" />
+                  </label>
+                </div>
+                <label>Afiliado (opcional)
+                  <select id="chkAfiliado">
+                    <option value="">Venda direta (sem afiliado)</option>
+                  </select>
+                </label>
+                <label>Forma de Pagamento
+                  <select id="chkPagamento" onchange="atualizarInstrucaoPagamento()">
+                    <option value="Pix">Pix (Copia e Cola / QR)</option>
+                    <option value="Cartão">Cartão (Crédito / Débito)</option>
+                    <option value="WhatsApp">Combinar no WhatsApp</option>
+                  </select>
+                </label>
+                <div class="pay-box" id="instrucaoPagamento"></div>
+                <button type="submit" class="btn-primary">✅ Confirmar Pagamento e Finalizar Pedido</button>
+              </form>
+            </div>
           </div>
         </div>
 
@@ -552,9 +645,9 @@
             </div>
             <div class="kpi-card">
               <div>
-                <div class="kpi-label">Pedidos no Mês</div>
-                <div class="kpi-value">148</div>
-                <div class="kpi-delta">↑ +9%</div>
+                <div class="kpi-label">Pedidos Registrados</div>
+                <div class="kpi-value" id="dashPedidos">0</div>
+                <div class="kpi-delta">↑ Atualizado</div>
               </div>
               <div class="kpi-icon">📦</div>
             </div>
@@ -569,8 +662,8 @@
             <div class="kpi-card">
               <div>
                 <div class="kpi-label">Itens em Estoque</div>
-                <div class="kpi-value">640 potes</div>
-                <div class="kpi-delta">↑ Saudável</div>
+                <div class="kpi-value" id="dashEstoque">0 un</div>
+                <div class="kpi-delta">↑ Sincronizado</div>
               </div>
               <div class="kpi-icon">📋</div>
             </div>
@@ -578,7 +671,7 @@
           <div class="card">
             <h2>Resumo Operacional — CARBOMEL | Mel Puro</h2>
             <p style="margin-top:8px;color:#4b5563;font-size:14px;">
-              Use o menu lateral para navegar entre <strong>Afiliados</strong>, <strong>Produtos</strong>, <strong>Estoque</strong>, <strong>Pedidos</strong>, <strong>Financeiro</strong> e <strong>Configurações</strong>.
+              Cadastre novos méis ou kits em <strong>Produtos</strong>, venda direto na <strong>Loja / Vender</strong> e acompanhe estoque, clientes, pedidos e comissões em tempo real.
             </p>
           </div>
         </div>
@@ -587,13 +680,13 @@
         <div class="view-section" id="view-Pedidos">
           <div class="card">
             <div class="card-header">
-              <h2>📦 Pedidos Recentes</h2>
-              <button class="btn btn-sale" onclick="simularVendaRapida(); renderizarPedidos();">+ Novo Pedido via Afiliado</button>
+              <h2>📦 Pedidos Realizados</h2>
+              <button class="btn btn-edit" onclick="abrirAba('Loja')">+ Nova Compra / Venda</button>
             </div>
             <div class="table-wrap">
               <table>
                 <thead>
-                  <tr><th>Pedido</th><th>Data</th><th>Afiliado / Origem</th><th>Valor</th><th>Comissão</th></tr>
+                  <tr><th>Pedido</th><th>Data</th><th>Cliente / Origem</th><th>Pagamento</th><th>Valor</th><th>Comissão</th></tr>
                 </thead>
                 <tbody id="tabelaPedidos"></tbody>
               </table>
@@ -601,22 +694,60 @@
           </div>
         </div>
 
-        <!-- TELA 4: PRODUTOS -->
+        <!-- TELA 4: PRODUTOS (CADASTRO + CATÁLOGO) -->
         <div class="view-section" id="view-Produtos">
-          <div class="card">
-            <h2>🍯 Catálogo de Produtos — Mel Puro</h2>
-            <div class="table-wrap" style="margin-top:12px;">
-              <table>
-                <thead>
-                  <tr><th>Produto</th><th>Embalagem</th><th>Preço</th><th>Comissão</th><th>Status</th></tr>
-                </thead>
-                <tbody>
-                  <tr><td><strong>Mel Silvestre Puro</strong></td><td>Vidro 500g</td><td>R$ 49,90</td><td>15%</td><td><span class="badge badge-ativo">Disponível</span></td></tr>
-                  <tr><td><strong>Mel de Flor de Laranjeira</strong></td><td>Vidro 1kg</td><td>R$ 89,90</td><td>15%</td><td><span class="badge badge-ativo">Disponível</span></td></tr>
-                  <tr><td><strong>Kit Degustação Carbomel</strong></td><td>3x 300g</td><td>R$ 149,90</td><td>20%</td><td><span class="badge badge-ativo">Destaque</span></td></tr>
-                  <tr><td><strong>Própolis Verde Extrato</strong></td><td>Frasco 30ml</td><td>R$ 39,90</td><td>15%</td><td><span class="badge badge-pendente">Baixo giro</span></td></tr>
-                </tbody>
-              </table>
+          <div class="grid-main">
+            <div class="card">
+              <div class="card-header">
+                <h2>🍯 Catálogo de Produtos — Mel Puro</h2>
+                <button class="btn btn-edit" onclick="abrirAba('Loja')">Ir para Loja</button>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr><th>Produto</th><th>Embalagem</th><th>Preço</th><th>Estoque</th><th>Comissão</th><th>Status</th><th>Ações</th></tr>
+                  </thead>
+                  <tbody id="tabelaProdutos"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="card">
+              <h2>⊕ Cadastrar Produto para Venda</h2>
+              <form id="formProduto" class="form">
+                <label>Nome do Produto *
+                  <input type="text" id="prodNome" placeholder="Ex.: Mel Silvestre Puro" required />
+                </label>
+                <label>Embalagem *
+                  <input type="text" id="prodEmbalagem" placeholder="Ex.: Vidro 500g" required />
+                </label>
+                <div class="form-row-2">
+                  <label>Preço (R$) *
+                    <input type="number" step="0.01" min="0.01" id="prodPreco" placeholder="49.90" required />
+                  </label>
+                  <label>Estoque Inicial *
+                    <input type="number" min="0" id="prodEstoque" placeholder="100" required />
+                  </label>
+                </div>
+                <div class="form-row-2">
+                  <label>Comissão (%)
+                    <select id="prodComissao">
+                      <option value="10">10%</option>
+                      <option value="15" selected>15%</option>
+                      <option value="20">20%</option>
+                      <option value="25">25%</option>
+                    </select>
+                  </label>
+                  <label>Status
+                    <select id="prodStatus">
+                      <option value="Disponível">Disponível</option>
+                      <option value="Destaque">Destaque</option>
+                      <option value="Baixo giro">Baixo giro</option>
+                    </select>
+                  </label>
+                </div>
+                <button type="submit" class="btn-primary">⊕ Cadastrar Produto</button>
+              </form>
             </div>
           </div>
         </div>
@@ -625,19 +756,15 @@
         <div class="view-section" id="view-Estoque">
           <div class="card">
             <div class="card-header">
-              <h2>📋 Controle de Estoque</h2>
-              <button class="btn btn-edit" onclick="showToast('Inventário conferido com sucesso.')">Conferir Lote</button>
+              <h2>📋 Controle de Estoque Sincronizado</h2>
+              <button class="btn btn-edit" onclick="showToast('Estoque sincronizado com os produtos e vendas.')">Atualizar Estoque</button>
             </div>
             <div class="table-wrap">
               <table>
                 <thead>
-                  <tr><th>Lote</th><th>Produto</th><th>Quantidade</th><th>Validade</th><th>Situação</th></tr>
+                  <tr><th>Código</th><th>Produto</th><th>Embalagem</th><th>Quantidade</th><th>Situação</th></tr>
                 </thead>
-                <tbody>
-                  <tr><td>#L2026-01</td><td>Mel Silvestre Puro 500g</td><td><strong>280 un</strong></td><td>10/2027</td><td><span class="badge badge-ativo">OK</span></td></tr>
-                  <tr><td>#L2026-02</td><td>Mel de Flor de Laranjeira 1kg</td><td><strong>195 un</strong></td><td>11/2027</td><td><span class="badge badge-ativo">OK</span></td></tr>
-                  <tr><td>#L2026-03</td><td>Kit Degustação Carbomel</td><td><strong>65 kits</strong></td><td>09/2027</td><td><span class="badge badge-pendente">Atenção</span></td></tr>
-                </tbody>
+                <tbody id="tabelaEstoque"></tbody>
               </table>
             </div>
           </div>
@@ -650,13 +777,9 @@
             <div class="table-wrap" style="margin-top:12px;">
               <table>
                 <thead>
-                  <tr><th>Cliente</th><th>Cidade</th><th>Compras</th><th>Total Gasto</th></tr>
+                  <tr><th>Cliente</th><th>Telefone</th><th>Cidade</th><th>Compras</th><th>Total Gasto</th></tr>
                 </thead>
-                <tbody>
-                  <tr><td><strong>Mariana Rocha</strong></td><td>Salvador - BA</td><td>4</td><td>R$ 549,60</td></tr>
-                  <tr><td><strong>Pedro Henrique</strong></td><td>Feira de Santana - BA</td><td>2</td><td>R$ 239,80</td></tr>
-                  <tr><td><strong>Camila Almeida</strong></td><td>Lauro de Freitas - BA</td><td>3</td><td>R$ 389,70</td></tr>
-                </tbody>
+                <tbody id="tabelaClientes"></tbody>
               </table>
             </div>
           </div>
@@ -666,15 +789,15 @@
         <div class="view-section" id="view-Financeiro">
           <div class="grid-2">
             <div class="card">
-              <h2>💰 Resumo Financeiro de Comissões</h2>
-              <p style="margin-top:10px;font-size:14px;">Vendas geradas por afiliados: <strong id="finVendas">R$ 0,00</strong></p>
+              <h2>💰 Resumo Financeiro</h2>
+              <p style="margin-top:10px;font-size:14px;">Vendas registradas no sistema: <strong id="finVendas">R$ 0,00</strong></p>
               <p style="margin-top:6px;font-size:14px;">Comissões pendentes: <strong id="finPendentes">R$ 0,00</strong></p>
               <p style="margin-top:6px;font-size:14px;">Comissões pagas: <strong id="finPagas">R$ 0,00</strong></p>
             </div>
             <div class="card">
               <h2>🏦 Repasse Rápido</h2>
               <p style="margin-top:10px;color:#4b5563;font-size:13px;">
-                Ative um afiliado na aba <strong>Afiliados</strong> para mover o status de <em>Pendente</em> para <em>Ativo</em> e atualizar o cálculo de comissões.
+                Ao finalizar uma compra na <strong>Loja / Vender</strong> com afiliado selecionado ou via link <code>?ref=CODIGO</code>, a comissão é calculada automaticamente.
               </p>
             </div>
           </div>
@@ -685,10 +808,12 @@
           <div class="card">
             <div class="card-header">
               <h2>📊 Relatório de Performance</h2>
-              <button class="btn btn-copy" onclick="showToast('Relatório exportado para a sessão atual.')">Exportar Resumo</button>
+              <button class="btn btn-copy" onclick="showToast('Relatório atualizado na tela.')">Atualizar Dados</button>
             </div>
             <p style="color:#4b5563;font-size:14px;">
-              Total de afiliados cadastrados: <strong id="relTotalAfiliados">0</strong> • Conversões registradas: <strong id="relTotalConversoes">0</strong>.
+              Produtos cadastrados: <strong id="relTotalProdutos">0</strong> •
+              Afiliados: <strong id="relTotalAfiliados">0</strong> •
+              Pedidos: <strong id="relTotalConversoes">0</strong>.
             </p>
           </div>
         </div>
@@ -703,6 +828,9 @@
               </label>
               <label>Slogan do Rodapé
                 <input type="text" id="cfgSlogan" value="Juntos vamos mais longe!" />
+              </label>
+              <label>Chave Pix para Checkout
+                <input type="text" id="cfgPix" value="pix@carbomel.com.br" />
               </label>
               <label>Comissão Padrão (%)
                 <select id="cfgComissaoPadrao">
@@ -722,7 +850,7 @@
             <h2>🎧 Central de Suporte</h2>
             <form id="formSuporte" class="form" style="margin-top:12px;">
               <label>Assunto
-                <input type="text" id="supAssunto" placeholder="Ex.: Dúvida sobre comissão ou link" required />
+                <input type="text" id="supAssunto" placeholder="Ex.: Dúvida sobre cadastro de produto ou pagamento" required />
               </label>
               <label>Mensagem
                 <textarea id="supMsg" rows="4" placeholder="Descreva sua solicitação..." required></textarea>
@@ -749,7 +877,7 @@
   <div class="toast" id="toast"></div>
 
   <script>
-    const STORAGE_KEY = "carbomel_afiliados_v1";
+    const STORAGE_KEY = "carbomel_sistema_v2";
 
     const dadosIniciais = () => {
       const baseLink = window.location.href.split("?")[0].split("#")[0];
@@ -771,6 +899,24 @@
       return {
         nextId: 6,
         nextPedido: 2459,
+        nextProdId: 5,
+        config: {
+          empresa: "CARBOMEL | Mel Puro",
+          slogan: "Juntos vamos mais longe!",
+          pix: "pix@carbomel.com.br",
+          comissaoPadrao: 15
+        },
+        produtos: [
+          { id: 1, nome: "Mel Silvestre Puro", embalagem: "Vidro 500g", preco: 49.90, estoque: 120, comissao: 15, status: "Disponível" },
+          { id: 2, nome: "Mel de Flor de Laranjeira", embalagem: "Vidro 1kg", preco: 89.90, estoque: 85, comissao: 15, status: "Disponível" },
+          { id: 3, nome: "Kit Degustação Carbomel", embalagem: "3x 300g", preco: 149.90, estoque: 45, comissao: 20, status: "Destaque" },
+          { id: 4, nome: "Própolis Verde Extrato", embalagem: "Frasco 30ml", preco: 39.90, estoque: 30, comissao: 15, status: "Baixo giro" }
+        ],
+        clientes: [
+          { nome: "Mariana Rocha", telefone: "(71) 99111-2233", cidade: "Salvador - BA", compras: 4, totalGasto: 549.60 },
+          { nome: "Pedro Henrique", telefone: "(75) 98822-3344", cidade: "Feira de Santana - BA", compras: 2, totalGasto: 239.80 },
+          { nome: "Camila Almeida", telefone: "(71) 99733-4455", cidade: "Lauro de Freitas - BA", compras: 3, totalGasto: 389.70 }
+        ],
         afiliados: [
           criarAf(1, "Carlos Souza", "(71) 98765-4321", "carlos@carbomel.com.br", 15, "CARLOS15", 2480, 96, 12800.00, "Ativo"),
           criarAf(2, "Juliana Santos", "(71) 99123-4567", "juliana@carbomel.com.br", 15, "JULIANA15", 1870, 72, 9600.00, "Ativo"),
@@ -779,27 +925,30 @@
           criarAf(5, "Diego Pereira", "(71) 98111-2233", "diego@carbomel.com.br", 15, "DIEGO15", 420, 17, 2266.67, "Inativo")
         ],
         conversoes: [
-          { dataHora: "17/11/2026 14:32", afiliadoNome: "Juliana Santos", pedido: "#0002458", valor: 149.90, comissao: 22.49 },
-          { dataHora: "17/11/2026 13:50", afiliadoNome: "Carlos Souza", pedido: "#0002457", valor: 199.90, comissao: 29.99 },
-          { dataHora: "16/11/2026 20:15", afiliadoNome: "Roberto Silva", pedido: "#0002456", valor: 129.90, comissao: 19.49 },
-          { dataHora: "16/11/2026 17:20", afiliadoNome: "Luciana Oliveira", pedido: "#0002455", valor: 89.90, comissao: 13.49 }
+          { dataHora: "17/11/2026 14:32", afiliadoNome: "Juliana Santos", clienteNome: "Mariana Rocha", pagamento: "Pix", pedido: "#0002458", valor: 149.90, comissao: 22.49 },
+          { dataHora: "17/11/2026 13:50", afiliadoNome: "Carlos Souza", clienteNome: "Pedro Henrique", pagamento: "Cartão", pedido: "#0002457", valor: 199.90, comissao: 29.99 },
+          { dataHora: "16/11/2026 20:15", afiliadoNome: "Roberto Silva", clienteNome: "Camila Almeida", pagamento: "Pix", pedido: "#0002456", valor: 129.90, comissao: 19.49 },
+          { dataHora: "16/11/2026 17:20", afiliadoNome: "Luciana Oliveira", clienteNome: "Mariana Rocha", pagamento: "WhatsApp", pedido: "#0002455", valor: 89.90, comissao: 13.49 }
         ]
       };
     };
 
     let state = carregarEstado();
+    let carrinho = [];
     let abaAtual = "Afiliados";
+    let refDetectadoCodigo = "";
 
     const metaAbas = {
-      Dashboard: { titulo: "🏠 Dashboard", subtitulo: "Visão geral de vendas, pedidos e operações da CARBOMEL." },
-      Pedidos: { titulo: "📦 Pedidos", subtitulo: "Acompanhe os pedidos gerados e as comissões atribuídas." },
-      Produtos: { titulo: "🍯 Produtos", subtitulo: "Gerencie o catálogo de méis e produtos da CARBOMEL." },
-      Estoque: { titulo: "📋 Estoque", subtitulo: "Controle de lotes, quantidades e validade." },
+      Dashboard: { titulo: "🏠 Dashboard", subtitulo: "Visão geral de vendas, estoque, clientes e operações da CARBOMEL." },
+      Loja: { titulo: "🛍️ Loja / Vender", subtitulo: "Compre ou registre vendas diretamente com escolha de pagamento e baixa de estoque." },
+      Pedidos: { titulo: "📦 Pedidos", subtitulo: "Acompanhe os pedidos gerados, formas de pagamento e comissões." },
+      Produtos: { titulo: "🍯 Produtos", subtitulo: "Cadastre e gerencie os produtos disponíveis para venda." },
+      Estoque: { titulo: "📋 Estoque", subtitulo: "Acompanhe o saldo de cada produto após as vendas." },
       Clientes: { titulo: "👤 Clientes", subtitulo: "Histórico de clientes e compras realizadas." },
       Financeiro: { titulo: "💰 Financeiro", subtitulo: "Controle de faturamento e comissões dos afiliados." },
       Afiliados: { titulo: "👥 Afiliados", subtitulo: "Gerencie seus afiliados e acompanhe as vendas geradas por eles." },
-      Relatórios: { titulo: "📊 Relatórios", subtitulo: "Indicadores consolidados do programa de afiliados." },
-      Configurações: { titulo: "⚙️ Configurações", subtitulo: "Ajustes gerais da marca e regras de comissão." },
+      Relatórios: { titulo: "📊 Relatórios", subtitulo: "Indicadores consolidados do sistema." },
+      Configurações: { titulo: "⚙️ Configurações", subtitulo: "Ajustes gerais da marca, Pix e comissão padrão." },
       Suporte: { titulo: "🎧 Suporte", subtitulo: "Fale com o suporte do sistema." },
       Sair: { titulo: "🚪 Sair", subtitulo: "Gerenciar sessão do administrador." }
     };
@@ -809,7 +958,7 @@
         const raw = localStorage.getItem(STORAGE_KEY);
         if (raw) {
           const parsed = JSON.parse(raw);
-          if (parsed && Array.isArray(parsed.afiliados)) return parsed;
+          if (parsed && Array.isArray(parsed.afiliados) && Array.isArray(parsed.produtos)) return parsed;
         }
       } catch (e) {}
       const inicial = dadosIniciais();
@@ -823,6 +972,7 @@
 
     function restaurarPadrao() {
       state = dadosIniciais();
+      carrinho = [];
       salvarEstado();
       showToast("Dados padrão restaurados.");
       renderizarTudo();
@@ -834,7 +984,7 @@
       const el = document.getElementById("toast");
       el.textContent = msg;
       el.classList.add("show");
-      setTimeout(() => el.classList.remove("show"), 2600);
+      setTimeout(() => el.classList.remove("show"), 2700);
     }
 
     function toggleSidebar() {
@@ -873,9 +1023,10 @@
       if (!ref) return;
       const af = state.afiliados.find((a) => a.codigo.toLowerCase() === ref.toLowerCase());
       if (af) {
+        refDetectadoCodigo = af.codigo;
         af.cliques = Number(af.cliques || 0) + 1;
         salvarEstado();
-        showToast(`Clique contabilizado para ${af.nomeCompleto} (${af.codigo})!`);
+        showToast(`Link de afiliado detectado: ${af.nomeCompleto} (${af.codigo})`);
       }
     }
 
@@ -901,11 +1052,12 @@
         .filter((a) => a.status !== "Ativo")
         .reduce((acc, a) => acc + Number(a.comissaoAcumulada || 0), 0);
       const pagas = Math.max(0, comissaoTotal - pendentes);
-      return { ativos, vendasTotal, pendentes, pagas };
+      const estoqueTotal = state.produtos.reduce((acc, p) => acc + Number(p.estoque || 0), 0);
+      return { ativos, vendasTotal, pendentes, pagas, estoqueTotal };
     }
 
     function renderizarKpis() {
-      const { ativos, vendasTotal, pendentes, pagas } = calcularTotais();
+      const { ativos, vendasTotal, pendentes, pagas, estoqueTotal } = calcularTotais();
 
       document.getElementById("kpiAtivos").textContent = ativos;
       document.getElementById("kpiVendas").textContent = fmtBRL(vendasTotal);
@@ -914,17 +1066,327 @@
       document.getElementById("destaqueGrafico").textContent = fmtBRL(vendasTotal);
 
       document.getElementById("dashFaturamento").textContent = fmtBRL(vendasTotal + 18500);
+      document.getElementById("dashPedidos").textContent = state.conversoes.length;
       document.getElementById("dashAfiliados").textContent = ativos;
+      document.getElementById("dashEstoque").textContent = `${estoqueTotal} un`;
+
       document.getElementById("finVendas").textContent = fmtBRL(vendasTotal);
       document.getElementById("finPendentes").textContent = fmtBRL(pendentes);
       document.getElementById("finPagas").textContent = fmtBRL(pagas);
+
+      document.getElementById("relTotalProdutos").textContent = state.produtos.length;
       document.getElementById("relTotalAfiliados").textContent = state.afiliados.length;
       document.getElementById("relTotalConversoes").textContent = state.conversoes.length;
+
+      const qtdCarrinho = carrinho.reduce((acc, item) => acc + item.qtd, 0);
+      document.getElementById("badgeCarrinho").textContent = qtdCarrinho;
 
       if (abaAtual === "Afiliados") {
         desenharGrafico(vendasTotal);
       }
     }
+
+    function renderizarProdutos() {
+      const tbody = document.getElementById("tabelaProdutos");
+      tbody.innerHTML = "";
+
+      if (state.produtos.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:#6b7280;padding:18px;">Nenhum produto cadastrado.</td></tr>`;
+        return;
+      }
+
+      state.produtos.forEach((p) => {
+        const badgeClass =
+          p.estoque <= 0 ? "badge-inativo" : p.status === "Baixo giro" ? "badge-pendente" : "badge-ativo";
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><strong>${escapeHtml(p.nome)}</strong></td>
+          <td>${escapeHtml(p.embalagem)}</td>
+          <td><strong>${fmtBRL(p.preco)}</strong></td>
+          <td>${p.estoque} un</td>
+          <td>${p.comissao}%</td>
+          <td><span class="badge ${badgeClass}">${p.estoque <= 0 ? "Sem estoque" : escapeHtml(p.status)}</span></td>
+          <td>
+            <div class="actions">
+              <button class="btn btn-sale" onclick="adicionarAoCarrinho(${p.id}); abrirAba('Loja');">+Carrinho</button>
+              <button class="btn btn-del" onclick="excluirProduto(${p.id})">✕</button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderizarEstoque() {
+      const tbody = document.getElementById("tabelaEstoque");
+      tbody.innerHTML = "";
+      state.produtos.forEach((p) => {
+        const situacao = p.estoque <= 0 ? "Sem estoque" : p.estoque < 35 ? "Reposição" : "OK";
+        const badge = p.estoque <= 0 ? "badge-inativo" : p.estoque < 35 ? "badge-pendente" : "badge-ativo";
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>#P00${p.id}</td>
+          <td><strong>${escapeHtml(p.nome)}</strong></td>
+          <td>${escapeHtml(p.embalagem)}</td>
+          <td><strong>${p.estoque} un</strong></td>
+          <td><span class="badge ${badge}">${situacao}</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderizarClientes() {
+      const tbody = document.getElementById("tabelaClientes");
+      tbody.innerHTML = "";
+      state.clientes.forEach((c) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><strong>${escapeHtml(c.nome)}</strong></td>
+          <td>${escapeHtml(c.telefone || "-")}</td>
+          <td>${escapeHtml(c.cidade || "-")}</td>
+          <td>${c.compras}</td>
+          <td><strong>${fmtBRL(c.totalGasto)}</strong></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderizarVitrineECarrinho() {
+      const vitrine = document.getElementById("vitrineProdutos");
+      vitrine.innerHTML = "";
+
+      state.produtos.forEach((p) => {
+        const semEstoque = Number(p.estoque) <= 0;
+        const card = document.createElement("div");
+        card.className = "prod-card";
+        card.innerHTML = `
+          <div>
+            <strong>${escapeHtml(p.nome)}</strong>
+            <div class="prod-meta">${escapeHtml(p.embalagem)} • Estoque: ${p.estoque} un</div>
+            <div class="prod-preco">${fmtBRL(p.preco)}</div>
+          </div>
+          <button class="btn btn-primary" ${semEstoque ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""} onclick="adicionarAoCarrinho(${p.id})">
+            ${semEstoque ? "Esgotado" : "+ Adicionar ao Carrinho"}
+          </button>
+        `;
+        vitrine.appendChild(card);
+      });
+
+      const selectAf = document.getElementById("chkAfiliado");
+      const valorAtualSelect = selectAf.value || refDetectadoCodigo;
+      selectAf.innerHTML = `<option value="">Venda direta (sem afiliado)</option>`;
+      state.afiliados.forEach((a) => {
+        const opt = document.createElement("option");
+        opt.value = a.codigo;
+        opt.textContent = `${a.nomeCompleto} (${a.codigo} - ${a.percentualComissao}%)`;
+        if (valorAtualSelect && valorAtualSelect.toLowerCase() === a.codigo.toLowerCase()) {
+          opt.selected = true;
+        }
+        selectAf.appendChild(opt);
+      });
+
+      const badgeRef = document.getElementById("refAtivoBadge");
+      badgeRef.textContent = selectAf.value ? `Afiliado: ${selectAf.value}` : "Venda direta";
+
+      const lista = document.getElementById("listaCarrinho");
+      if (carrinho.length === 0) {
+        lista.innerHTML = `<p style="color:#6b7280;font-size:13px;">Seu carrinho está vazio. Adicione um produto ao lado.</p>`;
+        document.getElementById("totalCarrinho").textContent = fmtBRL(0);
+        atualizarInstrucaoPagamento();
+        return;
+      }
+
+      let total = 0;
+      lista.innerHTML = "";
+      carrinho.forEach((item) => {
+        const subtotal = item.preco * item.qtd;
+        total += subtotal;
+        const row = document.createElement("div");
+        row.className = "cart-item";
+        row.innerHTML = `
+          <div>
+            <strong>${escapeHtml(item.nome)}</strong><br/>
+            <small style="color:#6b7280">${item.qtd} x ${fmtBRL(item.preco)} = <strong>${fmtBRL(subtotal)}</strong></small>
+          </div>
+          <div class="actions">
+            <button class="btn btn-copy" onclick="alterarQtdCarrinho(${item.produtoId}, -1)">-</button>
+            <button class="btn btn-copy" onclick="alterarQtdCarrinho(${item.produtoId}, 1)">+</button>
+            <button class="btn btn-del" onclick="removerDoCarrinho(${item.produtoId})">✕</button>
+          </div>
+        `;
+        lista.appendChild(row);
+      });
+
+      document.getElementById("totalCarrinho").textContent = fmtBRL(total);
+      atualizarInstrucaoPagamento(total);
+    }
+
+    function atualizarInstrucaoPagamento(totalOverride) {
+      const box = document.getElementById("instrucaoPagamento");
+      if (!box) return;
+      const forma = document.getElementById("chkPagamento").value;
+      const total = typeof totalOverride === "number"
+        ? totalOverride
+        : carrinho.reduce((acc, item) => acc + item.preco * item.qtd, 0);
+
+      if (forma === "Pix") {
+        box.innerHTML = `<strong>Pagamento via Pix:</strong> Chave <code>${escapeHtml(state.config.pix)}</code> • Valor: <strong>${fmtBRL(total)}</strong>. Ao confirmar, o pedido é registrado e o estoque é atualizado.`;
+      } else if (forma === "Cartão") {
+        box.innerHTML = `<strong>Pagamento via Cartão:</strong> Valor de <strong>${fmtBRL(total)}</strong> processado para registro do pedido no sistema.`;
+      } else {
+        box.innerHTML = `<strong>Combinar no WhatsApp:</strong> O pedido de <strong>${fmtBRL(total)}</strong> é salvo no painel para atendimento e fechamento direto.`;
+      }
+    }
+
+    function adicionarAoCarrinho(produtoId) {
+      const prod = state.produtos.find((p) => p.id === produtoId);
+      if (!prod || prod.estoque <= 0) {
+        showToast("Produto sem estoque disponível.");
+        return;
+      }
+      const existente = carrinho.find((c) => c.produtoId === produtoId);
+      const qtdAtual = existente ? existente.qtd : 0;
+      if (qtdAtual + 1 > prod.estoque) {
+        showToast("Quantidade máxima em estoque atingida para este produto.");
+        return;
+      }
+      if (existente) {
+        existente.qtd += 1;
+      } else {
+        carrinho.push({ produtoId: prod.id, nome: prod.nome, preco: prod.preco, comissao: prod.comissao, qtd: 1 });
+      }
+      showToast(`${prod.nome} adicionado ao carrinho.`);
+      renderizarTudo();
+    }
+
+    function alterarQtdCarrinho(produtoId, delta) {
+      const idx = carrinho.findIndex((c) => c.produtoId === produtoId);
+      if (idx === -1) return;
+      const prod = state.produtos.find((p) => p.id === produtoId);
+      const novaQtd = carrinho[idx].qtd + delta;
+      if (novaQtd <= 0) {
+        carrinho.splice(idx, 1);
+      } else if (prod && novaQtd > prod.estoque) {
+        showToast("Sem estoque suficiente para aumentar mais.");
+        return;
+      } else {
+        carrinho[idx].qtd = novaQtd;
+      }
+      renderizarTudo();
+    }
+
+    function removerDoCarrinho(produtoId) {
+      carrinho = carrinho.filter((c) => c.produtoId !== produtoId);
+      renderizarTudo();
+    }
+
+    function excluirProduto(id) {
+      const prod = state.produtos.find((p) => p.id === id);
+      if (!prod) return;
+      if (!confirm(`Remover o produto ${prod.nome}?`)) return;
+      state.produtos = state.produtos.filter((p) => p.id !== id);
+      carrinho = carrinho.filter((c) => c.produtoId !== id);
+      salvarEstado();
+      showToast(`Produto ${prod.nome} removido.`);
+      renderizarTudo();
+    }
+
+    document.getElementById("formProduto").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const nome = document.getElementById("prodNome").value.trim();
+      const embalagem = document.getElementById("prodEmbalagem").value.trim();
+      const preco = Number(document.getElementById("prodPreco").value);
+      const estoque = Number(document.getElementById("prodEstoque").value);
+      const comissao = Number(document.getElementById("prodComissao").value) || state.config.comissaoPadrao;
+      const status = document.getElementById("prodStatus").value;
+
+      if (!nome || !embalagem || preco <= 0 || estoque < 0) return;
+
+      state.produtos.push({
+        id: state.nextProdId++,
+        nome,
+        embalagem,
+        preco,
+        estoque,
+        comissao,
+        status
+      });
+
+      salvarEstado();
+      e.target.reset();
+      showToast(`Produto "${nome}" cadastrado para venda!`);
+      renderizarTudo();
+    });
+
+    document.getElementById("formCheckout").addEventListener("submit", (e) => {
+      e.preventDefault();
+      if (carrinho.length === 0) {
+        showToast("Adicione pelo menos 1 produto ao carrinho antes de finalizar.");
+        return;
+      }
+
+      const clienteNome = document.getElementById("chkClienteNome").value.trim();
+      const clienteFone = document.getElementById("chkClienteFone").value.trim();
+      const clienteCidade = document.getElementById("chkClienteCidade").value.trim();
+      const codigoAf = document.getElementById("chkAfiliado").value.trim();
+      const pagamento = document.getElementById("chkPagamento").value;
+
+      let totalPedido = 0;
+      let comissaoPedido = 0;
+
+      carrinho.forEach((item) => {
+        const prod = state.produtos.find((p) => p.id === item.produtoId);
+        const subtotal = item.preco * item.qtd;
+        totalPedido += subtotal;
+        if (prod) {
+          prod.estoque = Math.max(0, Number(prod.estoque) - item.qtd);
+        }
+      });
+
+      const af = codigoAf ? state.afiliados.find((a) => a.codigo === codigoAf) : null;
+      if (af) {
+        comissaoPedido = totalPedido * (Number(af.percentualComissao) / 100);
+        af.vendasQtd = Number(af.vendasQtd || 0) + 1;
+        af.vendasValor = Number(af.vendasValor || 0) + totalPedido;
+        af.comissaoAcumulada = Number(af.comissaoAcumulada || 0) + comissaoPedido;
+      }
+
+      const clienteExistente = state.clientes.find((c) => c.nome.toLowerCase() === clienteNome.toLowerCase());
+      if (clienteExistente) {
+        clienteExistente.compras += 1;
+        clienteExistente.totalGasto = Number(clienteExistente.totalGasto || 0) + totalPedido;
+        if (clienteFone) clienteExistente.telefone = clienteFone;
+        if (clienteCidade) clienteExistente.cidade = clienteCidade;
+      } else {
+        state.clientes.unshift({
+          nome: clienteNome,
+          telefone: clienteFone || "-",
+          cidade: clienteCidade || "-",
+          compras: 1,
+          totalGasto: totalPedido
+        });
+      }
+
+      const agora = new Date();
+      const dataHora = `${String(agora.getDate()).padStart(2, "0")}/${String(agora.getMonth() + 1).padStart(2, "0")}/${agora.getFullYear()} ${String(agora.getHours()).padStart(2, "0")}:${String(agora.getMinutes()).padStart(2, "0")}`;
+      const numPedido = "#" + String(state.nextPedido++).padStart(7, "0");
+
+      state.conversoes.unshift({
+        dataHora,
+        afiliadoNome: af ? af.nomeCompleto : "Venda Direta",
+        clienteNome,
+        pagamento,
+        pedido: numPedido,
+        valor: totalPedido,
+        comissao: comissaoPedido
+      });
+
+      carrinho = [];
+      salvarEstado();
+      e.target.reset();
+      showToast(`Pedido ${numPedido} (${pagamento}) finalizado com sucesso!`);
+      abrirAba("Pedidos");
+    });
 
     function renderizarAfiliados() {
       const busca = document.getElementById("buscaInput").value.trim().toLowerCase();
@@ -1012,7 +1474,8 @@
         tr.innerHTML = `
           <td><strong>${escapeHtml(c.pedido)}</strong></td>
           <td>${escapeHtml(c.dataHora)}</td>
-          <td>${escapeHtml(c.afiliadoNome)}</td>
+          <td>${escapeHtml(c.clienteNome || "-")} (${escapeHtml(c.afiliadoNome)})</td>
+          <td>${escapeHtml(c.pagamento || "Pix")}</td>
           <td>${fmtBRL(c.valor)}</td>
           <td style="color:#166534;font-weight:700;">${fmtBRL(c.comissao)}</td>
         `;
@@ -1041,6 +1504,8 @@
       state.conversoes.unshift({
         dataHora,
         afiliadoNome: af.nomeCompleto,
+        clienteNome: "Venda Rápida",
+        pagamento: "Pix",
         pedido: "#" + String(numPedido).padStart(7, "0"),
         valor: valorVenda,
         comissao: comissaoGerada
@@ -1083,7 +1548,7 @@
     document.getElementById("formAfiliado").addEventListener("submit", (e) => {
       e.preventDefault();
       const id = state.nextId++;
-      const pct = Number(document.getElementById("percentualComissao").value) || 15;
+      const pct = Number(document.getElementById("percentualComissao").value) || state.config.comissaoPadrao;
       const codDigitado = document.getElementById("codigo").value.trim().toUpperCase();
       const codigo = codDigitado || ("AUTO" + (1000 + id));
       const baseLink = window.location.href.split("?")[0].split("#")[0];
@@ -1111,12 +1576,18 @@
 
     document.getElementById("formConfig")?.addEventListener("submit", (e) => {
       e.preventDefault();
+      const empresa = document.getElementById("cfgEmpresa").value.trim();
       const slogan = document.getElementById("cfgSlogan").value.trim();
-      const comissaoPadrao = document.getElementById("cfgComissaoPadrao").value;
-      if (slogan) {
-        document.querySelector(".slogan").textContent = slogan;
+      const pix = document.getElementById("cfgPix").value.trim();
+      const comissaoPadrao = Number(document.getElementById("cfgComissaoPadrao").value);
+
+      state.config = { empresa: empresa || state.config.empresa, slogan: slogan || state.config.slogan, pix: pix || state.config.pix, comissaoPadrao };
+      if (state.config.slogan) {
+        document.querySelector(".slogan").textContent = state.config.slogan;
       }
-      document.getElementById("percentualComissao").value = comissaoPadrao;
+      document.getElementById("percentualComissao").value = String(comissaoPadrao);
+      salvarEstado();
+      atualizarInstrucaoPagamento();
       showToast("Configurações salvas!");
     });
 
@@ -1213,6 +1684,10 @@
 
     function renderizarTudo() {
       renderizarKpis();
+      renderizarProdutos();
+      renderizarEstoque();
+      renderizarClientes();
+      renderizarVitrineECarrinho();
       renderizarAfiliados();
       renderizarConversoes();
       renderizarPedidos();
@@ -1220,6 +1695,7 @@
 
     document.getElementById("buscaInput").addEventListener("input", renderizarAfiliados);
     document.getElementById("statusSelect").addEventListener("change", renderizarAfiliados);
+    document.getElementById("chkAfiliado").addEventListener("change", renderizarVitrineECarrinho);
 
     atualizarData();
     registrarCliquePorQuery();
