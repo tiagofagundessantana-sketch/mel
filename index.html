@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CARBOMEL | Mel Puro — Sistema de Gestão v1.0</title>
-  <link rel="icon" type="image/png" href="./logo-carbomel.png" />
+  <link id="faviconLink" rel="icon" type="image/png" href="./logo-carbomel.png" />
   <style>
     :root {
       --bg: #f3f4f6;
@@ -51,9 +51,9 @@
       padding-bottom: 14px;
     }
     .brand-logo {
-      width: 48px;
-      height: 48px;
-      border-radius: 10px;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
       background: #ffffff;
       padding: 4px;
       display: flex;
@@ -61,7 +61,7 @@
       justify-content: center;
       overflow: hidden;
       flex-shrink: 0;
-      border: 2px solid var(--gold);
+      box-shadow: 0 0 0 2px #141619, 0 0 0 4px var(--gold);
     }
     .brand-logo img {
       width: 100%;
@@ -353,7 +353,12 @@
       <div>
         <div class="brand">
           <div class="brand-logo">
-            <img src="./logo-carbomel.png" alt="CARBOMEL - Mel Puro" />
+            <img
+              id="brandLogoImg"
+              src="./logo-carbomel.png"
+              alt="CARBOMEL - Mel Puro"
+              onerror="usarLogoAlternativa(this)"
+            />
           </div>
           <div>
             <div class="brand-title">CARBOMEL</div>
@@ -754,6 +759,18 @@
 
   <script>
     const STORAGE_KEY = "carbomel_afiliados_v1";
+
+    function usarLogoAlternativa(imgEl) {
+      if (imgEl.dataset.tentouAlternativa) {
+        imgEl.style.display = "none";
+        return;
+      }
+      imgEl.dataset.tentouAlternativa = "1";
+      const fallback = "./carbomel - logo vetor.png";
+      imgEl.src = fallback;
+      const fav = document.getElementById("faviconLink");
+      if (fav) fav.href = fallback;
+    }
 
     const dadosIniciais = () => {
       const baseLink = window.location.href.split("?")[0].split("#")[0];
