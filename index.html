@@ -27,6 +27,71 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: "Segoe UI", system-ui, -apple-system, sans-serif; }
     body { background: var(--bg); color: var(--text); }
 
+    /* Tela de Login ADM */
+    .login-screen {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at top, #23272e 0%, #111316 70%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 200;
+    }
+    .login-screen.hidden { display: none; }
+    .login-card {
+      width: 100%;
+      max-width: 390px;
+      background: #181b20;
+      color: #f9fafb;
+      border: 1px solid #2b303a;
+      border-top: 4px solid var(--gold);
+      border-radius: 16px;
+      padding: 28px 24px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+      text-align: center;
+    }
+    .login-logo {
+      width: 104px;
+      height: 104px;
+      margin: 0 auto 14px;
+      border-radius: 50%;
+      overflow: hidden;
+      background: #141619;
+      box-shadow: 0 0 0 3px #181b20, 0 0 0 5px var(--gold);
+    }
+    .login-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scale(1.12);
+      display: block;
+    }
+    .login-title { font-size: 21px; font-weight: 900; color: var(--gold); letter-spacing: 0.6px; }
+    .login-sub { font-size: 12px; color: #fde68a; font-weight: 700; letter-spacing: 1px; margin-top: 2px; margin-bottom: 18px; }
+    .login-form { display: flex; flex-direction: column; gap: 12px; text-align: left; }
+    .login-form label { display: flex; flex-direction: column; gap: 5px; font-size: 13px; font-weight: 600; color: #e5e7eb; }
+    .login-form input {
+      background: #111316;
+      color: #fff;
+      border: 1px solid #323844;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 14px;
+    }
+    .login-erro {
+      display: none;
+      background: rgba(239, 68, 68, 0.16);
+      border: 1px solid #ef4444;
+      color: #fecaca;
+      border-radius: 8px;
+      padding: 9px 11px;
+      font-size: 12px;
+      font-weight: 600;
+      text-align: center;
+    }
+    .login-erro.show { display: block; }
+
     .layout { display: flex; min-height: 100vh; }
 
     /* Sidebar */
@@ -366,7 +431,7 @@
       transform: translateY(10px);
       transition: 0.2s;
       pointer-events: none;
-      z-index: 99;
+      z-index: 300;
     }
     .toast.show { opacity: 1; transform: translateY(0); }
 
@@ -382,6 +447,28 @@
   </style>
 </head>
 <body>
+  <!-- TELA DE LOGIN DO ADMINISTRADOR -->
+  <div class="login-screen" id="loginScreen">
+    <div class="login-card">
+      <div class="login-logo">
+        <img src="./logo.png" alt="Logo CARBOMEL Mel Puro" />
+      </div>
+      <div class="login-title">CARBOMEL</div>
+      <div class="login-sub">ACESSO DO ADMINISTRADOR</div>
+
+      <form class="login-form" id="formLogin">
+        <label>Login
+          <input type="text" id="loginUsuario" placeholder="Digite o login" autocomplete="username" required />
+        </label>
+        <label>Senha
+          <input type="password" id="loginSenha" placeholder="Digite a senha" autocomplete="current-password" required />
+        </label>
+        <div class="login-erro" id="loginErro">Login ou senha inválidos. Tente novamente.</div>
+        <button type="submit" class="btn-primary">🔐 Entrar no Sistema</button>
+      </form>
+    </div>
+  </div>
+
   <div class="layout">
     <aside class="sidebar" id="sidebar">
       <div>
@@ -432,7 +519,7 @@
           <button class="notif-btn" onclick="showToast('3 notificações: 2 comissões aguardando revisão e 1 novo afiliado.')">
             🔔<span class="notif-badge">3</span>
           </button>
-          <div class="admin-box">👤 Administrador ▾</div>
+          <div class="admin-box" onclick="bloquearSessao()" style="cursor:pointer;" title="Clique para sair / bloquear">👤 ADM (MEL) • Sair</div>
         </div>
       </header>
 
@@ -865,9 +952,12 @@
           <div class="card" style="max-width:480px;">
             <h2>🚪 Encerrar Sessão</h2>
             <p style="margin-top:8px;color:#4b5563;font-size:14px;">
-              Deseja voltar para a tela principal de <strong>Afiliados</strong>?
+              Deseja bloquear a sessão do administrador e voltar para a tela de login?
             </p>
-            <button class="btn-primary" style="margin-top:14px;" onclick="abrirAba('Afiliados')">Voltar para Afiliados</button>
+            <div class="actions" style="margin-top:14px;">
+              <button class="btn-primary" style="width:auto;" onclick="bloquearSessao()">Bloquear e ir para Login</button>
+              <button class="btn btn-reset" style="padding:11px 14px;" onclick="abrirAba('Afiliados')">Continuar logado</button>
+            </div>
           </div>
         </div>
       </section>
@@ -878,6 +968,9 @@
 
   <script>
     const STORAGE_KEY = "carbomel_sistema_v2";
+    const AUTH_KEY = "carbomel_adm_auth_v1";
+    const ADM_LOGIN = "MEL";
+    const ADM_SENHA = "4958";
 
     const dadosIniciais = () => {
       const baseLink = window.location.href.split("?")[0].split("#")[0];
@@ -937,6 +1030,43 @@
     let carrinho = [];
     let abaAtual = "Afiliados";
     let refDetectadoCodigo = "";
+
+    function verificarSessao() {
+      const autenticado = sessionStorage.getItem(AUTH_KEY) === "1";
+      const tela = document.getElementById("loginScreen");
+      if (autenticado) {
+        tela.classList.add("hidden");
+      } else {
+        tela.classList.remove("hidden");
+        document.getElementById("loginUsuario").focus();
+      }
+    }
+
+    function bloquearSessao() {
+      sessionStorage.removeItem(AUTH_KEY);
+      document.getElementById("loginUsuario").value = "";
+      document.getElementById("loginSenha").value = "";
+      document.getElementById("loginErro").classList.remove("show");
+      verificarSessao();
+      showToast("Sessão encerrada.");
+    }
+
+    document.getElementById("formLogin").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const u = document.getElementById("loginUsuario").value.trim().toUpperCase();
+      const s = document.getElementById("loginSenha").value.trim();
+      const erro = document.getElementById("loginErro");
+
+      if (u === ADM_LOGIN && s === ADM_SENHA) {
+        sessionStorage.setItem(AUTH_KEY, "1");
+        erro.classList.remove("show");
+        verificarSessao();
+        showToast("Bem-vindo, Administrador CARBOMEL!");
+        renderizarTudo();
+      } else {
+        erro.classList.add("show");
+      }
+    });
 
     const metaAbas = {
       Dashboard: { titulo: "🏠 Dashboard", subtitulo: "Visão geral de vendas, estoque, clientes e operações da CARBOMEL." },
@@ -1699,6 +1829,7 @@
 
     atualizarData();
     registrarCliquePorQuery();
+    verificarSessao();
     renderizarTudo();
   </script>
 </body>
