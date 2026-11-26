@@ -513,11 +513,11 @@
         </div>
         <div class="topbar-right">
           <div class="date-box" id="dataBox"></div>
-          <button class="notif-btn" onclick="abrirAba('Loja')">
+          <button class="notif-btn" onclick="abrirAba('Loja')" title="Abrir carrinho na Loja">
             🛍️<span class="notif-badge" id="badgeCarrinho">0</span>
           </button>
-          <button class="notif-btn" onclick="showToast('3 notificações: 2 comissões aguardando revisão e 1 novo afiliado.')">
-            🔔<span class="notif-badge">3</span>
+          <button class="notif-btn" onclick="abrirAba('Financeiro')" title="Ver resumo financeiro">
+            🔔<span class="notif-badge" id="badgeAlertas">0</span>
           </button>
           <div class="admin-box" onclick="bloquearSessao()" style="cursor:pointer;" title="Clique para sair / bloquear">👤 ADM (MEL) • Sair</div>
         </div>
@@ -530,9 +530,8 @@
             <p id="pageSubtitle">Gerencie seus afiliados e acompanhe as vendas geradas por eles.</p>
           </div>
           <div class="header-actions">
-            <button class="btn btn-edit" onclick="abrirAba('Loja')">🛍️ Comprar / Vender na Loja</button>
-            <button class="btn btn-sale" onclick="simularVendaRapida()">⚡ Simular Venda (+R$ 149,90)</button>
-            <button class="btn btn-reset" onclick="restaurarPadrao()">↺ Restaurar dados</button>
+            <button class="btn btn-edit" onclick="abrirAba('Loja')">🛍️ Nova Venda / Loja</button>
+            <button class="btn btn-reset" onclick="limparTodosDados()">🗑️ Limpar dados</button>
           </div>
         </div>
 
@@ -541,8 +540,8 @@
           <div class="grid-main">
             <div class="card">
               <div class="card-header">
-                <h2>🍯 Vitrine de Produtos — Compra Direta</h2>
-                <span class="badge badge-ativo" id="refAtivoBadge">Sem afiliado</span>
+                <h2>🍯 Vitrine de Produtos — Venda / Compra</h2>
+                <span class="badge badge-ativo" id="refAtivoBadge">Venda direta</span>
               </div>
               <div class="vitrine-grid" id="vitrineProdutos"></div>
             </div>
@@ -557,14 +556,14 @@
 
               <form id="formCheckout" class="form">
                 <label>Nome do Cliente *
-                  <input type="text" id="chkClienteNome" placeholder="Nome completo" required />
+                  <input type="text" id="chkClienteNome" placeholder="Nome completo do cliente" required />
                 </label>
                 <div class="form-row-2">
                   <label>Telefone / WhatsApp
-                    <input type="text" id="chkClienteFone" placeholder="(71) 99999-0000" />
+                    <input type="text" id="chkClienteFone" placeholder="(71) 90000-0000" />
                   </label>
                   <label>Cidade
-                    <input type="text" id="chkClienteCidade" placeholder="Salvador - BA" />
+                    <input type="text" id="chkClienteCidade" placeholder="Cidade - UF" />
                   </label>
                 </div>
                 <label>Afiliado (opcional)
@@ -576,6 +575,7 @@
                   <select id="chkPagamento" onchange="atualizarInstrucaoPagamento()">
                     <option value="Pix">Pix (Copia e Cola / QR)</option>
                     <option value="Cartão">Cartão (Crédito / Débito)</option>
+                    <option value="Dinheiro">Dinheiro</option>
                     <option value="WhatsApp">Combinar no WhatsApp</option>
                   </select>
                 </label>
@@ -593,7 +593,7 @@
               <div>
                 <div class="kpi-label">Afiliados Ativos</div>
                 <div class="kpi-value" id="kpiAtivos">0</div>
-                <div class="kpi-delta">↑ +12%</div>
+                <div class="kpi-delta">Tempo real</div>
               </div>
               <div class="kpi-icon">👥</div>
             </div>
@@ -601,7 +601,7 @@
               <div>
                 <div class="kpi-label">Vendas por Afiliados</div>
                 <div class="kpi-value" id="kpiVendas">R$ 0,00</div>
-                <div class="kpi-delta">↑ +18%</div>
+                <div class="kpi-delta">Tempo real</div>
               </div>
               <div class="kpi-icon">🛒</div>
             </div>
@@ -609,7 +609,7 @@
               <div>
                 <div class="kpi-label">Comissões Pendentes</div>
                 <div class="kpi-value" id="kpiPendentes">R$ 0,00</div>
-                <div class="kpi-delta">↑ +10%</div>
+                <div class="kpi-delta">A pagar</div>
               </div>
               <div class="kpi-icon">💳</div>
             </div>
@@ -617,7 +617,7 @@
               <div>
                 <div class="kpi-label">Comissões Pagas</div>
                 <div class="kpi-value" id="kpiPagas">R$ 0,00</div>
-                <div class="kpi-delta">↑ +22%</div>
+                <div class="kpi-delta">Liquidado</div>
               </div>
               <div class="kpi-icon">✅</div>
             </div>
@@ -663,10 +663,10 @@
                   <input type="text" id="nomeCompleto" placeholder="Digite o nome do afiliado" required />
                 </label>
                 <label>Telefone / WhatsApp *
-                  <input type="text" id="telefone" placeholder="(71) 98765-4321" required />
+                  <input type="text" id="telefone" placeholder="(71) 90000-0000" required />
                 </label>
                 <label>E-mail *
-                  <input type="email" id="email" placeholder="exemplo@email.com" required />
+                  <input type="email" id="email" placeholder="afiliado@email.com" required />
                 </label>
                 <label>Percentual de Comissão *
                   <select id="percentualComissao">
@@ -678,7 +678,7 @@
                 </label>
                 <label>Código do Afiliado
                   <div class="code-row">
-                    <input type="text" id="codigo" placeholder="AUTO1234" />
+                    <input type="text" id="codigo" placeholder="Ex.: JOAO15" />
                     <button type="button" class="btn btn-copy" onclick="gerarCodigo()">Gerar</button>
                   </div>
                 </label>
@@ -690,7 +690,7 @@
           <div class="grid-bottom">
             <div class="card">
               <div class="card-header">
-                <h2>📈 Vendas por Afiliados (Últimos 30 Dias)</h2>
+                <h2>📈 Vendas por Afiliados</h2>
                 <span class="badge badge-ativo" id="destaqueGrafico">R$ 0,00</span>
               </div>
               <canvas id="graficoVendas" width="600" height="220"></canvas>
@@ -724,9 +724,9 @@
           <div class="kpis">
             <div class="kpi-card">
               <div>
-                <div class="kpi-label">Faturamento Total</div>
+                <div class="kpi-label">Faturamento Real</div>
                 <div class="kpi-value" id="dashFaturamento">R$ 0,00</div>
-                <div class="kpi-delta">↑ +15%</div>
+                <div class="kpi-delta">Vendas registradas</div>
               </div>
               <div class="kpi-icon">🍯</div>
             </div>
@@ -734,7 +734,7 @@
               <div>
                 <div class="kpi-label">Pedidos Registrados</div>
                 <div class="kpi-value" id="dashPedidos">0</div>
-                <div class="kpi-delta">↑ Atualizado</div>
+                <div class="kpi-delta">Total de pedidos</div>
               </div>
               <div class="kpi-icon">📦</div>
             </div>
@@ -742,7 +742,7 @@
               <div>
                 <div class="kpi-label">Afiliados Ativos</div>
                 <div class="kpi-value" id="dashAfiliados">0</div>
-                <div class="kpi-delta">↑ +12%</div>
+                <div class="kpi-delta">Cadastrados ativos</div>
               </div>
               <div class="kpi-icon">👥</div>
             </div>
@@ -750,7 +750,7 @@
               <div>
                 <div class="kpi-label">Itens em Estoque</div>
                 <div class="kpi-value" id="dashEstoque">0 un</div>
-                <div class="kpi-delta">↑ Sincronizado</div>
+                <div class="kpi-delta">Saldo atual</div>
               </div>
               <div class="kpi-icon">📋</div>
             </div>
@@ -758,7 +758,7 @@
           <div class="card">
             <h2>Resumo Operacional — CARBOMEL | Mel Puro</h2>
             <p style="margin-top:8px;color:#4b5563;font-size:14px;">
-              Cadastre novos méis ou kits em <strong>Produtos</strong>, venda direto na <strong>Loja / Vender</strong> e acompanhe estoque, clientes, pedidos e comissões em tempo real.
+              Cadastre seus produtos em <strong>Produtos</strong>, cadastre afiliados em <strong>Afiliados</strong>, registre vendas na <strong>Loja / Vender</strong> e lance entradas/saídas ou acertos em <strong>Financeiro</strong>.
             </p>
           </div>
         </div>
@@ -768,7 +768,7 @@
           <div class="card">
             <div class="card-header">
               <h2>📦 Pedidos Realizados</h2>
-              <button class="btn btn-edit" onclick="abrirAba('Loja')">+ Nova Compra / Venda</button>
+              <button class="btn btn-edit" onclick="abrirAba('Loja')">+ Nova Venda</button>
             </div>
             <div class="table-wrap">
               <table>
@@ -810,10 +810,10 @@
                 </label>
                 <div class="form-row-2">
                   <label>Preço (R$) *
-                    <input type="number" step="0.01" min="0.01" id="prodPreco" placeholder="49.90" required />
+                    <input type="number" step="0.01" min="0.01" id="prodPreco" placeholder="0.00" required />
                   </label>
                   <label>Estoque Inicial *
-                    <input type="number" min="0" id="prodEstoque" placeholder="100" required />
+                    <input type="number" min="0" id="prodEstoque" placeholder="0" required />
                   </label>
                 </div>
                 <div class="form-row-2">
@@ -844,12 +844,12 @@
           <div class="card">
             <div class="card-header">
               <h2>📋 Controle de Estoque Sincronizado</h2>
-              <button class="btn btn-edit" onclick="showToast('Estoque sincronizado com os produtos e vendas.')">Atualizar Estoque</button>
+              <button class="btn btn-edit" onclick="abrirAba('Produtos')">+ Cadastrar / Repor Produto</button>
             </div>
             <div class="table-wrap">
               <table>
                 <thead>
-                  <tr><th>Código</th><th>Produto</th><th>Embalagem</th><th>Quantidade</th><th>Situação</th></tr>
+                  <tr><th>Código</th><th>Produto</th><th>Embalagem</th><th>Quantidade</th><th>Situação</th><th>Ajuste</th></tr>
                 </thead>
                 <tbody id="tabelaEstoque"></tbody>
               </table>
@@ -859,33 +859,75 @@
 
         <!-- TELA 6: CLIENTES -->
         <div class="view-section" id="view-Clientes">
-          <div class="card">
-            <h2>👤 Base de Clientes</h2>
-            <div class="table-wrap" style="margin-top:12px;">
-              <table>
-                <thead>
-                  <tr><th>Cliente</th><th>Telefone</th><th>Cidade</th><th>Compras</th><th>Total Gasto</th></tr>
-                </thead>
-                <tbody id="tabelaClientes"></tbody>
-              </table>
+          <div class="grid-main">
+            <div class="card">
+              <h2>👤 Base de Clientes</h2>
+              <div class="table-wrap" style="margin-top:12px;">
+                <table>
+                  <thead>
+                    <tr><th>Cliente</th><th>Telefone</th><th>Cidade</th><th>Compras</th><th>Total Gasto</th></tr>
+                  </thead>
+                  <tbody id="tabelaClientes"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="card">
+              <h2>⊕ Cadastrar Cliente</h2>
+              <form id="formCliente" class="form">
+                <label>Nome do Cliente *
+                  <input type="text" id="cliNome" placeholder="Nome completo" required />
+                </label>
+                <label>Telefone / WhatsApp
+                  <input type="text" id="cliFone" placeholder="(71) 90000-0000" />
+                </label>
+                <label>Cidade
+                  <input type="text" id="cliCidade" placeholder="Cidade - UF" />
+                </label>
+                <button type="submit" class="btn-primary">⊕ Salvar Cliente</button>
+              </form>
             </div>
           </div>
         </div>
 
         <!-- TELA 7: FINANCEIRO -->
         <div class="view-section" id="view-Financeiro">
-          <div class="grid-2">
+          <div class="grid-main">
             <div class="card">
-              <h2>💰 Resumo Financeiro</h2>
+              <h2>💰 Resumo e Lançamentos Financeiros</h2>
               <p style="margin-top:10px;font-size:14px;">Vendas registradas no sistema: <strong id="finVendas">R$ 0,00</strong></p>
               <p style="margin-top:6px;font-size:14px;">Comissões pendentes: <strong id="finPendentes">R$ 0,00</strong></p>
               <p style="margin-top:6px;font-size:14px;">Comissões pagas: <strong id="finPagas">R$ 0,00</strong></p>
+              <p style="margin-top:6px;font-size:14px;">Outras entradas / despesas avulsas: <strong id="finLancamentos">R$ 0,00</strong></p>
+
+              <div class="table-wrap" style="margin-top:14px;">
+                <table>
+                  <thead>
+                    <tr><th>Data</th><th>Tipo</th><th>Descrição</th><th>Valor</th><th>Ação</th></tr>
+                  </thead>
+                  <tbody id="tabelaLancamentosFin"></tbody>
+                </table>
+              </div>
             </div>
+
             <div class="card">
-              <h2>🏦 Repasse Rápido</h2>
-              <p style="margin-top:10px;color:#4b5563;font-size:13px;">
-                Ao finalizar uma compra na <strong>Loja / Vender</strong> com afiliado selecionado ou via link <code>?ref=CODIGO</code>, a comissão é calculada automaticamente.
-              </p>
+              <h2>⊕ Registrar Entrada / Despesa / Comissão</h2>
+              <form id="formFinanceiro" class="form">
+                <label>Tipo de Lançamento *
+                  <select id="finTipo">
+                    <option value="Entrada">Entrada (Venda / Recebimento)</option>
+                    <option value="Despesa">Despesa (Embalagem / Frete / Insumo)</option>
+                    <option value="Comissão Paga">Comissão Paga a Afiliado</option>
+                  </select>
+                </label>
+                <label>Descrição *
+                  <input type="text" id="finDesc" placeholder="Ex.: Compra de potes de vidro ou repasse afiliado" required />
+                </label>
+                <label>Valor (R$) *
+                  <input type="number" step="0.01" min="0.01" id="finValor" placeholder="0.00" required />
+                </label>
+                <button type="submit" class="btn-primary">⊕ Registrar Lançamento</button>
+              </form>
             </div>
           </div>
         </div>
@@ -895,11 +937,12 @@
           <div class="card">
             <div class="card-header">
               <h2>📊 Relatório de Performance</h2>
-              <button class="btn btn-copy" onclick="showToast('Relatório atualizado na tela.')">Atualizar Dados</button>
+              <button class="btn btn-copy" onclick="renderizarTudo()">Atualizar Dados</button>
             </div>
             <p style="color:#4b5563;font-size:14px;">
               Produtos cadastrados: <strong id="relTotalProdutos">0</strong> •
               Afiliados: <strong id="relTotalAfiliados">0</strong> •
+              Clientes: <strong id="relTotalClientes">0</strong> •
               Pedidos: <strong id="relTotalConversoes">0</strong>.
             </p>
           </div>
@@ -911,13 +954,13 @@
             <h2>⚙️ Configurações do Sistema</h2>
             <form id="formConfig" class="form" style="margin-top:12px;">
               <label>Nome da Empresa
-                <input type="text" id="cfgEmpresa" value="CARBOMEL | Mel Puro" />
+                <input type="text" id="cfgEmpresa" placeholder="Ex.: CARBOMEL | Mel Puro" />
               </label>
               <label>Slogan do Rodapé
-                <input type="text" id="cfgSlogan" value="Juntos vamos mais longe!" />
+                <input type="text" id="cfgSlogan" placeholder="Ex.: Juntos vamos mais longe!" />
               </label>
               <label>Chave Pix para Checkout
-                <input type="text" id="cfgPix" value="pix@carbomel.com.br" />
+                <input type="text" id="cfgPix" placeholder="Digite sua chave Pix real" />
               </label>
               <label>Comissão Padrão (%)
                 <select id="cfgComissaoPadrao">
@@ -937,12 +980,12 @@
             <h2>🎧 Central de Suporte</h2>
             <form id="formSuporte" class="form" style="margin-top:12px;">
               <label>Assunto
-                <input type="text" id="supAssunto" placeholder="Ex.: Dúvida sobre cadastro de produto ou pagamento" required />
+                <input type="text" id="supAssunto" placeholder="Assunto do chamado" required />
               </label>
               <label>Mensagem
                 <textarea id="supMsg" rows="4" placeholder="Descreva sua solicitação..." required></textarea>
               </label>
-              <button type="submit" class="btn-primary">Enviar Mensagem</button>
+              <button type="submit" class="btn-primary">Registrar Mensagem</button>
             </form>
           </div>
         </div>
@@ -967,64 +1010,28 @@
   <div class="toast" id="toast"></div>
 
   <script>
-    const STORAGE_KEY = "carbomel_sistema_v2";
+    const STORAGE_KEY = "carbomel_sistema_real_v1";
     const AUTH_KEY = "carbomel_adm_auth_v1";
     const ADM_LOGIN = "MEL";
     const ADM_SENHA = "4958";
 
-    const dadosIniciais = () => {
-      const baseLink = window.location.href.split("?")[0].split("#")[0];
-      const criarAf = (id, nomeCompleto, telefone, email, percentualComissao, codigo, cliques, vendasQtd, vendasValor, status) => ({
-        id,
-        nomeCompleto,
-        telefone,
-        email,
-        percentualComissao,
-        codigo,
-        linkExclusivo: `${baseLink}?ref=${encodeURIComponent(codigo)}`,
-        cliques,
-        vendasQtd,
-        vendasValor,
-        comissaoAcumulada: vendasValor * (percentualComissao / 100),
-        status
-      });
-
-      return {
-        nextId: 6,
-        nextPedido: 2459,
-        nextProdId: 5,
-        config: {
-          empresa: "CARBOMEL | Mel Puro",
-          slogan: "Juntos vamos mais longe!",
-          pix: "pix@carbomel.com.br",
-          comissaoPadrao: 15
-        },
-        produtos: [
-          { id: 1, nome: "Mel Silvestre Puro", embalagem: "Vidro 500g", preco: 49.90, estoque: 120, comissao: 15, status: "Disponível" },
-          { id: 2, nome: "Mel de Flor de Laranjeira", embalagem: "Vidro 1kg", preco: 89.90, estoque: 85, comissao: 15, status: "Disponível" },
-          { id: 3, nome: "Kit Degustação Carbomel", embalagem: "3x 300g", preco: 149.90, estoque: 45, comissao: 20, status: "Destaque" },
-          { id: 4, nome: "Própolis Verde Extrato", embalagem: "Frasco 30ml", preco: 39.90, estoque: 30, comissao: 15, status: "Baixo giro" }
-        ],
-        clientes: [
-          { nome: "Mariana Rocha", telefone: "(71) 99111-2233", cidade: "Salvador - BA", compras: 4, totalGasto: 549.60 },
-          { nome: "Pedro Henrique", telefone: "(75) 98822-3344", cidade: "Feira de Santana - BA", compras: 2, totalGasto: 239.80 },
-          { nome: "Camila Almeida", telefone: "(71) 99733-4455", cidade: "Lauro de Freitas - BA", compras: 3, totalGasto: 389.70 }
-        ],
-        afiliados: [
-          criarAf(1, "Carlos Souza", "(71) 98765-4321", "carlos@carbomel.com.br", 15, "CARLOS15", 2480, 96, 12800.00, "Ativo"),
-          criarAf(2, "Juliana Santos", "(71) 99123-4567", "juliana@carbomel.com.br", 15, "JULIANA15", 1870, 72, 9600.00, "Ativo"),
-          criarAf(3, "Roberto Silva", "(71) 98456-7890", "roberto@carbomel.com.br", 15, "ROBERTO15", 1250, 48, 6400.00, "Ativo"),
-          criarAf(4, "Luciana Oliveira", "(71) 99988-7766", "luciana@carbomel.com.br", 15, "LUCIANA15", 680, 29, 3866.67, "Pendente"),
-          criarAf(5, "Diego Pereira", "(71) 98111-2233", "diego@carbomel.com.br", 15, "DIEGO15", 420, 17, 2266.67, "Inativo")
-        ],
-        conversoes: [
-          { dataHora: "17/11/2026 14:32", afiliadoNome: "Juliana Santos", clienteNome: "Mariana Rocha", pagamento: "Pix", pedido: "#0002458", valor: 149.90, comissao: 22.49 },
-          { dataHora: "17/11/2026 13:50", afiliadoNome: "Carlos Souza", clienteNome: "Pedro Henrique", pagamento: "Cartão", pedido: "#0002457", valor: 199.90, comissao: 29.99 },
-          { dataHora: "16/11/2026 20:15", afiliadoNome: "Roberto Silva", clienteNome: "Camila Almeida", pagamento: "Pix", pedido: "#0002456", valor: 129.90, comissao: 19.49 },
-          { dataHora: "16/11/2026 17:20", afiliadoNome: "Luciana Oliveira", clienteNome: "Mariana Rocha", pagamento: "WhatsApp", pedido: "#0002455", valor: 89.90, comissao: 13.49 }
-        ]
-      };
-    };
+    const dadosVazios = () => ({
+      nextId: 1,
+      nextPedido: 1,
+      nextProdId: 1,
+      nextFinId: 1,
+      config: {
+        empresa: "CARBOMEL | Mel Puro",
+        slogan: "",
+        pix: "",
+        comissaoPadrao: 15
+      },
+      produtos: [],
+      clientes: [],
+      afiliados: [],
+      conversoes: [],
+      lancamentosFin: []
+    });
 
     let state = carregarEstado();
     let carrinho = [];
@@ -1069,17 +1076,17 @@
     });
 
     const metaAbas = {
-      Dashboard: { titulo: "🏠 Dashboard", subtitulo: "Visão geral de vendas, estoque, clientes e operações da CARBOMEL." },
-      Loja: { titulo: "🛍️ Loja / Vender", subtitulo: "Compre ou registre vendas diretamente com escolha de pagamento e baixa de estoque." },
-      Pedidos: { titulo: "📦 Pedidos", subtitulo: "Acompanhe os pedidos gerados, formas de pagamento e comissões." },
-      Produtos: { titulo: "🍯 Produtos", subtitulo: "Cadastre e gerencie os produtos disponíveis para venda." },
-      Estoque: { titulo: "📋 Estoque", subtitulo: "Acompanhe o saldo de cada produto após as vendas." },
-      Clientes: { titulo: "👤 Clientes", subtitulo: "Histórico de clientes e compras realizadas." },
-      Financeiro: { titulo: "💰 Financeiro", subtitulo: "Controle de faturamento e comissões dos afiliados." },
-      Afiliados: { titulo: "👥 Afiliados", subtitulo: "Gerencie seus afiliados e acompanhe as vendas geradas por eles." },
-      Relatórios: { titulo: "📊 Relatórios", subtitulo: "Indicadores consolidados do sistema." },
-      Configurações: { titulo: "⚙️ Configurações", subtitulo: "Ajustes gerais da marca, Pix e comissão padrão." },
-      Suporte: { titulo: "🎧 Suporte", subtitulo: "Fale com o suporte do sistema." },
+      Dashboard: { titulo: "🏠 Dashboard", subtitulo: "Resumo real de vendas, estoque, clientes e afiliados." },
+      Loja: { titulo: "🛍️ Loja / Vender", subtitulo: "Registre vendas ou compras com pagamento, baixa de estoque e comissão." },
+      Pedidos: { titulo: "📦 Pedidos", subtitulo: "Histórico real de pedidos registrados no sistema." },
+      Produtos: { titulo: "🍯 Produtos", subtitulo: "Cadastre e gerencie os produtos reais para venda." },
+      Estoque: { titulo: "📋 Estoque", subtitulo: "Saldo real de estoque atualizado a cada venda ou ajuste." },
+      Clientes: { titulo: "👤 Clientes", subtitulo: "Cadastre e acompanhe seus clientes reais." },
+      Financeiro: { titulo: "💰 Financeiro", subtitulo: "Controle real de vendas, comissões e lançamentos financeiros." },
+      Afiliados: { titulo: "👥 Afiliados", subtitulo: "Cadastre afiliados e acompanhe vendas e comissões reais." },
+      Relatórios: { titulo: "📊 Relatórios", subtitulo: "Totais reais consolidados do sistema." },
+      Configurações: { titulo: "⚙️ Configurações", subtitulo: "Configure dados da marca, chave Pix e comissão padrão." },
+      Suporte: { titulo: "🎧 Suporte", subtitulo: "Registre solicitações e observações operacionais." },
       Sair: { titulo: "🚪 Sair", subtitulo: "Gerenciar sessão do administrador." }
     };
 
@@ -1088,10 +1095,12 @@
         const raw = localStorage.getItem(STORAGE_KEY);
         if (raw) {
           const parsed = JSON.parse(raw);
-          if (parsed && Array.isArray(parsed.afiliados) && Array.isArray(parsed.produtos)) return parsed;
+          if (parsed && Array.isArray(parsed.afiliados) && Array.isArray(parsed.produtos)) {
+            return { ...dadosVazios(), ...parsed, config: { ...dadosVazios().config, ...(parsed.config || {}) } };
+          }
         }
       } catch (e) {}
-      const inicial = dadosIniciais();
+      const inicial = dadosVazios();
       salvarEstado(inicial);
       return inicial;
     }
@@ -1100,12 +1109,22 @@
       localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
     }
 
-    function restaurarPadrao() {
-      state = dadosIniciais();
+    function limparTodosDados() {
+      if (!confirm("Apagar todos os cadastros, vendas, clientes e lançamentos para começar do zero?")) return;
+      state = dadosVazios();
       carrinho = [];
       salvarEstado();
-      showToast("Dados padrão restaurados.");
+      sincronizarCamposConfig();
+      showToast("Todos os dados foram limpos.");
       renderizarTudo();
+    }
+
+    function sincronizarCamposConfig() {
+      document.getElementById("cfgEmpresa").value = state.config.empresa || "";
+      document.getElementById("cfgSlogan").value = state.config.slogan || "";
+      document.getElementById("cfgPix").value = state.config.pix || "";
+      document.getElementById("cfgComissaoPadrao").value = String(state.config.comissaoPadrao || 15);
+      document.querySelector(".slogan").textContent = state.config.slogan || "";
     }
 
     const fmtBRL = (v) => Number(v || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -1176,26 +1195,35 @@
 
     function calcularTotais() {
       const ativos = state.afiliados.filter((a) => a.status === "Ativo").length;
-      const vendasTotal = state.afiliados.reduce((acc, a) => acc + Number(a.vendasValor || 0), 0);
+      const vendasAfiliados = state.afiliados.reduce((acc, a) => acc + Number(a.vendasValor || 0), 0);
+      const vendasPedidos = state.conversoes.reduce((acc, c) => acc + Number(c.valor || 0), 0);
+      const vendasTotal = Math.max(vendasAfiliados, vendasPedidos);
       const comissaoTotal = state.afiliados.reduce((acc, a) => acc + Number(a.comissaoAcumulada || 0), 0);
       const pendentes = state.afiliados
         .filter((a) => a.status !== "Ativo")
         .reduce((acc, a) => acc + Number(a.comissaoAcumulada || 0), 0);
       const pagas = Math.max(0, comissaoTotal - pendentes);
       const estoqueTotal = state.produtos.reduce((acc, p) => acc + Number(p.estoque || 0), 0);
-      return { ativos, vendasTotal, pendentes, pagas, estoqueTotal };
+      const saldoLancamentos = state.lancamentosFin.reduce((acc, l) => {
+        const val = Number(l.valor || 0);
+        if (l.tipo === "Entrada") return acc + val;
+        if (l.tipo === "Despesa" || l.tipo === "Comissão Paga") return acc - val;
+        return acc;
+      }, 0);
+
+      return { ativos, vendasAfiliados, vendasTotal, pendentes, pagas, estoqueTotal, saldoLancamentos };
     }
 
     function renderizarKpis() {
-      const { ativos, vendasTotal, pendentes, pagas, estoqueTotal } = calcularTotais();
+      const { ativos, vendasAfiliados, vendasTotal, pendentes, pagas, estoqueTotal, saldoLancamentos } = calcularTotais();
 
       document.getElementById("kpiAtivos").textContent = ativos;
-      document.getElementById("kpiVendas").textContent = fmtBRL(vendasTotal);
+      document.getElementById("kpiVendas").textContent = fmtBRL(vendasAfiliados);
       document.getElementById("kpiPendentes").textContent = fmtBRL(pendentes);
       document.getElementById("kpiPagas").textContent = fmtBRL(pagas);
-      document.getElementById("destaqueGrafico").textContent = fmtBRL(vendasTotal);
+      document.getElementById("destaqueGrafico").textContent = fmtBRL(vendasAfiliados);
 
-      document.getElementById("dashFaturamento").textContent = fmtBRL(vendasTotal + 18500);
+      document.getElementById("dashFaturamento").textContent = fmtBRL(vendasTotal + saldoLancamentos);
       document.getElementById("dashPedidos").textContent = state.conversoes.length;
       document.getElementById("dashAfiliados").textContent = ativos;
       document.getElementById("dashEstoque").textContent = `${estoqueTotal} un`;
@@ -1203,16 +1231,19 @@
       document.getElementById("finVendas").textContent = fmtBRL(vendasTotal);
       document.getElementById("finPendentes").textContent = fmtBRL(pendentes);
       document.getElementById("finPagas").textContent = fmtBRL(pagas);
+      document.getElementById("finLancamentos").textContent = fmtBRL(saldoLancamentos);
 
       document.getElementById("relTotalProdutos").textContent = state.produtos.length;
       document.getElementById("relTotalAfiliados").textContent = state.afiliados.length;
+      document.getElementById("relTotalClientes").textContent = state.clientes.length;
       document.getElementById("relTotalConversoes").textContent = state.conversoes.length;
 
       const qtdCarrinho = carrinho.reduce((acc, item) => acc + item.qtd, 0);
       document.getElementById("badgeCarrinho").textContent = qtdCarrinho;
+      document.getElementById("badgeAlertas").textContent = state.afiliados.filter((a) => a.status === "Pendente").length;
 
       if (abaAtual === "Afiliados") {
-        desenharGrafico(vendasTotal);
+        desenharGrafico(vendasAfiliados);
       }
     }
 
@@ -1221,7 +1252,7 @@
       tbody.innerHTML = "";
 
       if (state.produtos.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:#6b7280;padding:18px;">Nenhum produto cadastrado.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:#6b7280;padding:18px;">Nenhum produto cadastrado ainda. Use o formulário ao lado para cadastrar.</td></tr>`;
         return;
       }
 
@@ -1250,24 +1281,50 @@
     function renderizarEstoque() {
       const tbody = document.getElementById("tabelaEstoque");
       tbody.innerHTML = "";
+
+      if (state.produtos.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:#6b7280;padding:18px;">Nenhum item em estoque. Cadastre produtos na aba Produtos.</td></tr>`;
+        return;
+      }
+
       state.produtos.forEach((p) => {
-        const situacao = p.estoque <= 0 ? "Sem estoque" : p.estoque < 35 ? "Reposição" : "OK";
-        const badge = p.estoque <= 0 ? "badge-inativo" : p.estoque < 35 ? "badge-pendente" : "badge-ativo";
+        const situacao = p.estoque <= 0 ? "Sem estoque" : p.estoque < 15 ? "Baixo" : "OK";
+        const badge = p.estoque <= 0 ? "badge-inativo" : p.estoque < 15 ? "badge-pendente" : "badge-ativo";
         const tr = document.createElement("tr");
         tr.innerHTML = `
-          <td>#P00${p.id}</td>
+          <td>#P${String(p.id).padStart(3, "0")}</td>
           <td><strong>${escapeHtml(p.nome)}</strong></td>
           <td>${escapeHtml(p.embalagem)}</td>
           <td><strong>${p.estoque} un</strong></td>
           <td><span class="badge ${badge}">${situacao}</span></td>
+          <td>
+            <div class="actions">
+              <button class="btn btn-sale" onclick="ajustarEstoque(${p.id}, 1)">+1</button>
+              <button class="btn btn-copy" onclick="ajustarEstoque(${p.id}, -1)">-1</button>
+            </div>
+          </td>
         `;
         tbody.appendChild(tr);
       });
     }
 
+    function ajustarEstoque(id, delta) {
+      const prod = state.produtos.find((p) => p.id === id);
+      if (!prod) return;
+      prod.estoque = Math.max(0, Number(prod.estoque || 0) + delta);
+      salvarEstado();
+      renderizarTudo();
+    }
+
     function renderizarClientes() {
       const tbody = document.getElementById("tabelaClientes");
       tbody.innerHTML = "";
+
+      if (state.clientes.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#6b7280;padding:18px;">Nenhum cliente cadastrado ainda.</td></tr>`;
+        return;
+      }
+
       state.clientes.forEach((c) => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
@@ -1281,26 +1338,106 @@
       });
     }
 
+    function renderizarLancamentosFinanceiros() {
+      const tbody = document.getElementById("tabelaLancamentosFin");
+      if (!tbody) return;
+      tbody.innerHTML = "";
+
+      if (state.lancamentosFin.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#6b7280;padding:16px;">Nenhum lançamento avulso registrado.</td></tr>`;
+        return;
+      }
+
+      state.lancamentosFin.forEach((l) => {
+        const badge = l.tipo === "Entrada" ? "badge-ativo" : "badge-pendente";
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><small>${escapeHtml(l.dataHora)}</small></td>
+          <td><span class="badge ${badge}">${escapeHtml(l.tipo)}</span></td>
+          <td>${escapeHtml(l.descricao)}</td>
+          <td><strong>${fmtBRL(l.valor)}</strong></td>
+          <td><button class="btn btn-del" onclick="excluirLancamentoFin(${l.id})">✕</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function excluirLancamentoFin(id) {
+      state.lancamentosFin = state.lancamentosFin.filter((l) => l.id !== id);
+      salvarEstado();
+      showToast("Lançamento removido.");
+      renderizarTudo();
+    }
+
+    document.getElementById("formFinanceiro").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const tipo = document.getElementById("finTipo").value;
+      const descricao = document.getElementById("finDesc").value.trim();
+      const valor = Number(document.getElementById("finValor").value);
+      if (!descricao || valor <= 0) return;
+
+      const agora = new Date();
+      const dataHora = `${String(agora.getDate()).padStart(2, "0")}/${String(agora.getMonth() + 1).padStart(2, "0")}/${agora.getFullYear()} ${String(agora.getHours()).padStart(2, "0")}:${String(agora.getMinutes()).padStart(2, "0")}`;
+
+      state.lancamentosFin.unshift({
+        id: state.nextFinId++,
+        dataHora,
+        tipo,
+        descricao,
+        valor
+      });
+
+      salvarEstado();
+      e.target.reset();
+      showToast("Lançamento financeiro registrado!");
+      renderizarTudo();
+    });
+
+    document.getElementById("formCliente").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const nome = document.getElementById("cliNome").value.trim();
+      const telefone = document.getElementById("cliFone").value.trim();
+      const cidade = document.getElementById("cliCidade").value.trim();
+      if (!nome) return;
+
+      state.clientes.unshift({
+        nome,
+        telefone: telefone || "-",
+        cidade: cidade || "-",
+        compras: 0,
+        totalGasto: 0
+      });
+
+      salvarEstado();
+      e.target.reset();
+      showToast("Cliente cadastrado!");
+      renderizarTudo();
+    });
+
     function renderizarVitrineECarrinho() {
       const vitrine = document.getElementById("vitrineProdutos");
       vitrine.innerHTML = "";
 
-      state.produtos.forEach((p) => {
-        const semEstoque = Number(p.estoque) <= 0;
-        const card = document.createElement("div");
-        card.className = "prod-card";
-        card.innerHTML = `
-          <div>
-            <strong>${escapeHtml(p.nome)}</strong>
-            <div class="prod-meta">${escapeHtml(p.embalagem)} • Estoque: ${p.estoque} un</div>
-            <div class="prod-preco">${fmtBRL(p.preco)}</div>
-          </div>
-          <button class="btn btn-primary" ${semEstoque ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""} onclick="adicionarAoCarrinho(${p.id})">
-            ${semEstoque ? "Esgotado" : "+ Adicionar ao Carrinho"}
-          </button>
-        `;
-        vitrine.appendChild(card);
-      });
+      if (state.produtos.length === 0) {
+        vitrine.innerHTML = `<p style="color:#6b7280;font-size:13px;">Cadastre produtos na aba <strong>Produtos</strong> para vender aqui.</p>`;
+      } else {
+        state.produtos.forEach((p) => {
+          const semEstoque = Number(p.estoque) <= 0;
+          const card = document.createElement("div");
+          card.className = "prod-card";
+          card.innerHTML = `
+            <div>
+              <strong>${escapeHtml(p.nome)}</strong>
+              <div class="prod-meta">${escapeHtml(p.embalagem)} • Estoque: ${p.estoque} un</div>
+              <div class="prod-preco">${fmtBRL(p.preco)}</div>
+            </div>
+            <button class="btn btn-primary" ${semEstoque ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""} onclick="adicionarAoCarrinho(${p.id})">
+              ${semEstoque ? "Esgotado" : "+ Adicionar ao Carrinho"}
+            </button>
+          `;
+          vitrine.appendChild(card);
+        });
+      }
 
       const selectAf = document.getElementById("chkAfiliado");
       const valorAtualSelect = selectAf.value || refDetectadoCodigo;
@@ -1320,9 +1457,9 @@
 
       const lista = document.getElementById("listaCarrinho");
       if (carrinho.length === 0) {
-        lista.innerHTML = `<p style="color:#6b7280;font-size:13px;">Seu carrinho está vazio. Adicione um produto ao lado.</p>`;
+        lista.innerHTML = `<p style="color:#6b7280;font-size:13px;">Carrinho vazio.</p>`;
         document.getElementById("totalCarrinho").textContent = fmtBRL(0);
-        atualizarInstrucaoPagamento();
+        atualizarInstrucaoPagamento(0);
         return;
       }
 
@@ -1358,13 +1495,16 @@
       const total = typeof totalOverride === "number"
         ? totalOverride
         : carrinho.reduce((acc, item) => acc + item.preco * item.qtd, 0);
+      const chavePix = state.config.pix || "Configure a chave Pix em Configurações";
 
       if (forma === "Pix") {
-        box.innerHTML = `<strong>Pagamento via Pix:</strong> Chave <code>${escapeHtml(state.config.pix)}</code> • Valor: <strong>${fmtBRL(total)}</strong>. Ao confirmar, o pedido é registrado e o estoque é atualizado.`;
+        box.innerHTML = `<strong>Pix:</strong> <code>${escapeHtml(chavePix)}</code> • Valor: <strong>${fmtBRL(total)}</strong>.`;
       } else if (forma === "Cartão") {
-        box.innerHTML = `<strong>Pagamento via Cartão:</strong> Valor de <strong>${fmtBRL(total)}</strong> processado para registro do pedido no sistema.`;
+        box.innerHTML = `<strong>Cartão:</strong> Valor de <strong>${fmtBRL(total)}</strong>.`;
+      } else if (forma === "Dinheiro") {
+        box.innerHTML = `<strong>Dinheiro:</strong> Valor de <strong>${fmtBRL(total)}</strong>.`;
       } else {
-        box.innerHTML = `<strong>Combinar no WhatsApp:</strong> O pedido de <strong>${fmtBRL(total)}</strong> é salvo no painel para atendimento e fechamento direto.`;
+        box.innerHTML = `<strong>WhatsApp:</strong> Pedido de <strong>${fmtBRL(total)}</strong> salvo no sistema.`;
       }
     }
 
@@ -1499,7 +1639,7 @@
 
       const agora = new Date();
       const dataHora = `${String(agora.getDate()).padStart(2, "0")}/${String(agora.getMonth() + 1).padStart(2, "0")}/${agora.getFullYear()} ${String(agora.getHours()).padStart(2, "0")}:${String(agora.getMinutes()).padStart(2, "0")}`;
-      const numPedido = "#" + String(state.nextPedido++).padStart(7, "0");
+      const numPedido = "#" + String(state.nextPedido++).padStart(6, "0");
 
       state.conversoes.unshift({
         dataHora,
@@ -1514,7 +1654,7 @@
       carrinho = [];
       salvarEstado();
       e.target.reset();
-      showToast(`Pedido ${numPedido} (${pagamento}) finalizado com sucesso!`);
+      showToast(`Pedido ${numPedido} (${pagamento}) registrado!`);
       abrirAba("Pedidos");
     });
 
@@ -1536,7 +1676,7 @@
       tbody.innerHTML = "";
 
       if (lista.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:#6b7280;padding:18px;">Nenhum afiliado encontrado.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:#6b7280;padding:18px;">Nenhum afiliado cadastrado ainda. Use o formulário ao lado para cadastrar.</td></tr>`;
         return;
       }
 
@@ -1567,8 +1707,7 @@
           <td><span class="badge ${badgeClass}">${escapeHtml(a.status)}</span></td>
           <td>
             <div class="actions">
-              <button class="btn btn-sale" title="Registrar venda de R$ 149,90" onclick="registrarVenda(${a.id})">+Venda</button>
-              <button class="btn btn-edit" title="Alternar status" onclick="alternarStatus(${a.id})">Editar</button>
+              <button class="btn btn-edit" title="Alternar status" onclick="alternarStatus(${a.id})">Status</button>
               <button class="btn btn-del" title="Excluir afiliado" onclick="excluirAfiliado(${a.id})">✕</button>
             </div>
           </td>
@@ -1580,6 +1719,11 @@
     function renderizarConversoes() {
       const tbody = document.getElementById("tabelaConversoes");
       tbody.innerHTML = "";
+
+      if (state.conversoes.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#6b7280;padding:16px;">Nenhuma venda registrada ainda.</td></tr>`;
+        return;
+      }
 
       state.conversoes.slice(0, 6).forEach((c) => {
         const tr = document.createElement("tr");
@@ -1599,6 +1743,11 @@
       if (!tbody) return;
       tbody.innerHTML = "";
 
+      if (state.conversoes.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:#6b7280;padding:18px;">Nenhum pedido registrado ainda.</td></tr>`;
+        return;
+      }
+
       state.conversoes.forEach((c) => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
@@ -1616,44 +1765,6 @@
     function copiarLink(link) {
       navigator.clipboard?.writeText(link);
       showToast("Link copiado: " + link);
-    }
-
-    function registrarVenda(id, valorVenda = 149.90) {
-      const af = state.afiliados.find((a) => a.id === id);
-      if (!af) return;
-
-      const comissaoGerada = valorVenda * (Number(af.percentualComissao) / 100);
-      af.vendasQtd = Number(af.vendasQtd || 0) + 1;
-      af.vendasValor = Number(af.vendasValor || 0) + valorVenda;
-      af.comissaoAcumulada = Number(af.comissaoAcumulada || 0) + comissaoGerada;
-
-      const agora = new Date();
-      const dataHora = `${String(agora.getDate()).padStart(2, "0")}/${String(agora.getMonth() + 1).padStart(2, "0")}/${agora.getFullYear()} ${String(agora.getHours()).padStart(2, "0")}:${String(agora.getMinutes()).padStart(2, "0")}`;
-      const numPedido = state.nextPedido++;
-
-      state.conversoes.unshift({
-        dataHora,
-        afiliadoNome: af.nomeCompleto,
-        clienteNome: "Venda Rápida",
-        pagamento: "Pix",
-        pedido: "#" + String(numPedido).padStart(7, "0"),
-        valor: valorVenda,
-        comissao: comissaoGerada
-      });
-      if (state.conversoes.length > 30) state.conversoes.pop();
-
-      salvarEstado();
-      showToast(`Venda de ${fmtBRL(valorVenda)} registrada para ${af.nomeCompleto}!`);
-      renderizarTudo();
-    }
-
-    function simularVendaRapida() {
-      const ativo = state.afiliados.find((a) => a.status === "Ativo") || state.afiliados[0];
-      if (!ativo) {
-        showToast("Cadastre um afiliado primeiro.");
-        return;
-      }
-      registrarVenda(ativo.id, 149.90);
     }
 
     function alternarStatus(id) {
@@ -1680,7 +1791,7 @@
       const id = state.nextId++;
       const pct = Number(document.getElementById("percentualComissao").value) || state.config.comissaoPadrao;
       const codDigitado = document.getElementById("codigo").value.trim().toUpperCase();
-      const codigo = codDigitado || ("AUTO" + (1000 + id));
+      const codigo = codDigitado || ("AF" + String(id).padStart(3, "0"));
       const baseLink = window.location.href.split("?")[0].split("#")[0];
 
       state.afiliados.push({
@@ -1711,10 +1822,8 @@
       const pix = document.getElementById("cfgPix").value.trim();
       const comissaoPadrao = Number(document.getElementById("cfgComissaoPadrao").value);
 
-      state.config = { empresa: empresa || state.config.empresa, slogan: slogan || state.config.slogan, pix: pix || state.config.pix, comissaoPadrao };
-      if (state.config.slogan) {
-        document.querySelector(".slogan").textContent = state.config.slogan;
-      }
+      state.config = { empresa, slogan, pix, comissaoPadrao };
+      document.querySelector(".slogan").textContent = slogan;
       document.getElementById("percentualComissao").value = String(comissaoPadrao);
       salvarEstado();
       atualizarInstrucaoPagamento();
@@ -1723,7 +1832,7 @@
 
     document.getElementById("formSuporte")?.addEventListener("submit", (e) => {
       e.preventDefault();
-      showToast("Mensagem enviada ao suporte!");
+      showToast("Mensagem registrada!");
       e.target.reset();
     });
 
@@ -1739,14 +1848,10 @@
       const h = canvas.height;
       ctx.clearRect(0, 0, w, h);
 
-      const base = Math.max(totalAtual, 1000);
-      const fatores = [0.22, 0.35, 0.30, 0.48, 0.42, 0.65, 0.58, 0.76, 0.72, 0.88, 0.82, 1.0];
-      const pontos = fatores.map((f) => base * f);
-      const maxVal = Math.max(...pontos) * 1.15;
-
       const padL = 48, padR = 20, padT = 18, padB = 28;
       const plotW = w - padL - padR;
       const plotH = h - padT - padB;
+      const maxVal = Math.max(Number(totalAtual || 0), 100) * 1.15;
 
       ctx.strokeStyle = "#e5e7eb";
       ctx.lineWidth = 1;
@@ -1760,26 +1865,19 @@
         ctx.stroke();
 
         const val = maxVal * (1 - i / 4);
-        ctx.fillText(Math.round(val / 1000) + "k", 8, y + 4);
+        ctx.fillText("R$" + Math.round(val), 4, y + 4);
       }
 
-      const coords = pontos.map((v, idx) => {
-        const x = padL + (plotW * idx) / (pontos.length - 1);
+      const serie = state.afiliados.length > 0
+        ? state.afiliados.map((a) => Number(a.vendasValor || 0))
+        : [0, 0];
+
+      const coords = serie.map((v, idx) => {
+        const divisor = Math.max(serie.length - 1, 1);
+        const x = padL + (plotW * idx) / divisor;
         const y = padT + plotH - (v / maxVal) * plotH;
         return { x, y };
       });
-
-      const grad = ctx.createLinearGradient(0, padT, 0, h - padB);
-      grad.addColorStop(0, "rgba(245, 183, 0, 0.35)");
-      grad.addColorStop(1, "rgba(245, 183, 0, 0.0)");
-
-      ctx.beginPath();
-      ctx.moveTo(coords[0].x, h - padB);
-      coords.forEach((p) => ctx.lineTo(p.x, p.y));
-      ctx.lineTo(coords[coords.length - 1].x, h - padB);
-      ctx.closePath();
-      ctx.fillStyle = grad;
-      ctx.fill();
 
       ctx.beginPath();
       coords.forEach((p, idx) => (idx === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y)));
@@ -1794,12 +1892,8 @@
         ctx.fill();
       });
 
-      const labels = ["18/10", "25/10", "01/11", "08/11", "15/11", "Hoje"];
-      labels.forEach((lbl, idx) => {
-        const x = padL + (plotW * idx) / (labels.length - 1);
-        ctx.fillStyle = "#6b7280";
-        ctx.fillText(lbl, x - 12, h - 8);
-      });
+      ctx.fillStyle = "#6b7280";
+      ctx.fillText("Histórico real de afiliados", padL, h - 8);
     }
 
     function escapeHtml(s) {
@@ -1817,6 +1911,7 @@
       renderizarProdutos();
       renderizarEstoque();
       renderizarClientes();
+      renderizarLancamentosFinanceiros();
       renderizarVitrineECarrinho();
       renderizarAfiliados();
       renderizarConversoes();
@@ -1828,6 +1923,7 @@
     document.getElementById("chkAfiliado").addEventListener("change", renderizarVitrineECarrinho);
 
     atualizarData();
+    sincronizarCamposConfig();
     registrarCliquePorQuery();
     verificarSessao();
     renderizarTudo();
